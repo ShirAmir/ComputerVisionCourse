@@ -4,6 +4,7 @@
 # ******************* Shir Amir *******************
 # *************************************************
 
+from tkinter.filedialog import askopenfilename
 from skimage.segmentation import slic
 from skimage.segmentation import mark_boundaries
 from skimage.util import img_as_float
@@ -12,10 +13,9 @@ import numpy as np
 import cv2
 
 def set_img_border(image, border_size, border_value=-1):
-    """ confine borders so they wouldn't be chosen as patches. 
-    
+    """ confine borders so they wouldn't be chosen as patches.
+
     :param image: the image to be confined
-    :param border_size: the thikness of the border 
     :param border_value: the value of the border pixels
     :return: the bordered image
     """
@@ -61,10 +61,10 @@ def extract_patches(im_rgb, im_segments, patch_size=11, sample_size=0.01):
                 patches.append(roi)
         result.append(patches)
     return result
-    
+
 def paint_image_fragments(im_rgb, im_segments):
     """ color each segment of the image with the mean value of the segment.
-    
+
     :param im_rgb: the original image
     :param im_segments: the segmented image
     :return: the original image with painted segments according to their mean value
@@ -79,7 +79,7 @@ def paint_image_fragments(im_rgb, im_segments):
     for seg_num in unique_segments:
         # Find the mean value of the segment
         mean_segment_val = np.mean(im_rgb[im_segments == seg_num, :], axis=0)
-        # Color the segment in it's mean value
+        # Color the segment in its mean value
         result[im_segments == seg_num, :] = mean_segment_val
     return result
 
@@ -134,7 +134,7 @@ if __name__ == "__main__":
                 min_ssd = np.min(ssd)
                 cost_patches.append(min_ssd)
             distance[frag_key, label_key] = np.median(cost_patches)
-    
+    print(distance)
     # normalize distance values
     distance_limits = [np.min(distance), np.max(distance)]
     distance = np.interp(distance, distance_limits, [0, 1])
