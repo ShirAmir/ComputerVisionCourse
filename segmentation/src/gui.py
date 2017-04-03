@@ -3,7 +3,7 @@ from tkinter import ttk
 from tkinter.filedialog import askopenfilename
 from tkinter.filedialog import askdirectory
 
-# define callback functions 
+# define callback functions
 def get_train_img():
     train_img_path.set(askopenfilename())
     
@@ -23,10 +23,11 @@ def compute():
 # define root and main-frame of the GUI
 root = Tk()
 root.title("Segmentation")
-main_frame = ttk.Frame(root, padding="3 3 12 12")
-main_frame.grid(column=0, row=0, sticky=(N, W, E, S))
-main_frame.columnconfigure(0, weight=1)
-main_frame.rowconfigure(0, weight=1)
+frame = ttk.Frame(root)
+frame.grid(column=0, row=0, sticky=(N, W, E, S))
+frame.columnconfigure(0, weight=1)
+frame.rowconfigure(0, weight=1)
+frame.rowconfigure(0, weight=1)
 
 # define all the variables
 image = []
@@ -36,20 +37,25 @@ test_img_path = StringVar()
 output_dir = StringVar()
 
 # define teh button widgets
-ttk.Button(main_frame, text="Train Image", command=get_train_img, width=15).grid(column=0, row=1, sticky=W)
-ttk.Button(main_frame, text="Segment Image", command=get_segment_img, width=15).grid(column=0, row=2, sticky=W)
-ttk.Button(main_frame, text="New Image", command=get_new_img, width=15).grid(column=0, row=3, sticky=W)
-ttk.Button(main_frame, text="Output", command=get_output, width=15).grid(column=0, row=4, sticky=W)
-ttk.Button(main_frame, text="GO!", command=compute, width=15).grid(column=0, row=4, sticky=W)
+train_img_btn = ttk.Button(frame, text="Train Image", command=get_train_img, width=15)
+train_img_btn.grid(column=0, row=1, sticky=W)
+segment_img_btn = ttk.Button(frame, text="Segment Image", command=get_segment_img, width=15)
+segment_img_btn.grid(column=0, row=2, sticky=W)
+test_img_btn = ttk.Button(frame, text="New Image", command=get_new_img, width=15)
+test_img_btn.grid(column=0, row=3, sticky=W)
+output_path_btn = ttk.Button(frame, text="Output", command=get_output, width=15)
+output_path_btn.grid(column=0, row=4, sticky=W)
+run_btn = ttk.Button(frame, text="GO!", command=compute, width=15)
+run_btn.grid(column=0, row=5, sticky=W)
 
 # define the labels for debugging
-ttk.Label(main_frame, textvariable=train_img_path).grid(column=1, row=1, sticky=(W, E))
-ttk.Label(main_frame, textvariable=labels_img_path).grid(column=1, row=2, sticky=(W, E))
-ttk.Label(main_frame, textvariable=test_img_path).grid(column=1, row=3, sticky=(W, E))
-ttk.Label(main_frame, textvariable=output_dir).grid(column=1, row=4, sticky=(W, E))
+ttk.Label(frame, textvariable=train_img_path).grid(column=1, row=1, sticky=(W, E))
+ttk.Label(frame, textvariable=labels_img_path).grid(column=1, row=2, sticky=(W, E))
+ttk.Label(frame, textvariable=test_img_path).grid(column=1, row=3, sticky=(W, E))
+ttk.Label(frame, textvariable=output_dir).grid(column=1, row=4, sticky=(W, E))
 
 # change appearnace
-for child in main_frame.winfo_children(): child.grid_configure(padx=5, pady=5)
+for child in frame.winfo_children(): child.grid_configure(padx=5, pady=5)
 
 # execute GUI application
 root.mainloop()
