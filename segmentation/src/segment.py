@@ -5,6 +5,7 @@
 # ******************* Shir Amir *******************
 # *************************************************
 
+import os.path
 from skimage.segmentation import slic
 from skimage.segmentation import mark_boundaries
 from skimage.util import img_as_float
@@ -100,12 +101,16 @@ def paint_image_fragments(im_rgb, im_segments):
 """
 
 def segment_image(**kwargs):
+    """ execute the segmentation itself
+
+    :param kwargs: the parameter settings from the GUI
+    """
     print(kwargs)
     # Default parameters
     train_img_path = "../images/girl_train.jpg"
     labels_img_path = "../images/girl_train_labels.tif"
     test_img_path = "../images/girl_test.jpg"
-    output_dir = "../images"
+    output_dir = "../results/"
     frag_amount = 100
     patch_size = 9 # should be an odd number
     grabcut_thresh = 0.01
@@ -113,52 +118,52 @@ def segment_image(**kwargs):
     slic_sigma = 5
 
     # Change parameters specified by GUI
-    if kwargs.get('TRAIN_IMG_PATH') != None:
+    if kwargs.get('TRAIN_IMG_PATH') != '':
         train_img_path = kwargs.get('TRAIN_IMG_PATH')
-    if kwargs.get('LABELS_IMG_PATH') != None:
+    if kwargs.get('LABELS_IMG_PATH') != '':
         labels_img_path = kwargs.get('LABELS_IMG_PATH')
-    if kwargs.get('TEST_IMG_PATH') != None:
+    if kwargs.get('TEST_IMG_PATH') != '':
         test_img_path = kwargs.get('TEST_IMG_PATH')
-    if kwargs.get('OUTPUT_DIR') != None:
+    if kwargs.get('OUTPUT_DIR') != '':
         output_dir = kwargs.get('OUTPUT_DIR')
-    if kwargs.get('FRAG_AMOUNT') != None:
+    if kwargs.get('FRAG_AMOUNT') != '':
         frag_amount = int(kwargs.get('FRAG_AMOUNT'))
-    if kwargs.get('PATCH_SIZE') != None:
+    if kwargs.get('PATCH_SIZE') != '':
         patch_size = int(kwargs.get('PATCH_SIZE'))
-    if kwargs.get('GRABCUT_THRESH') != None:
+    if kwargs.get('GRABCUT_THRESH') != '':
         grabcut_thresh = float(kwargs.get('GRABCUT_THRESH'))
-    if kwargs.get('GRABCUT_ITER') != None:
+    if kwargs.get('GRABCUT_ITER') != '':
         grabcut_iter = int(kwargs.get('GRABCUT_ITER'))
-    if kwargs.get('SLIC_SIGMA') != None:
+    if kwargs.get('SLIC_SIGMA') != '':
         slic_sigma = int(kwargs.get('SLIC_SIGMA'))
 
     # Load images
-    TRAIN_IMG = cv2.cvtColor(cv2.imread(train_img_path), cv2.COLOR_BGR2RGB)
-    LABELS_IMG = cv2.imread(labels_img_path, cv2.IMREAD_GRAYSCALE)
-    TEST_IMG = cv2.cvtColor(cv2.imread(test_img_path), cv2.COLOR_BGR2RGB)
+    train_img = cv2.cvtColor(cv2.imread(train_img_path), cv2.COLOR_BGR2RGB)
+    labels_img = cv2.imread(labels_img_path, cv2.IMREAD_GRAYSCALE)
+    test_img = cv2.cvtColor(cv2.imread(test_img_path), cv2.COLOR_BGR2RGB)
 
     # Extract train patches from each label in train image
-    train_labels_patches = extract_patches(TRAIN_IMG, LABELS_IMG, patch_size)
+    train_labels_patches = extract_patches(train_img, labels_img, patch_size)
     labels_nums = range(len(train_labels_patches))
 
     # Compute SLIC fragmentation
     # Each pixel contains the key of its' fragment
-    fragments = slic(img_as_float(TEST_IMG), n_segments=frag_amount, sigma=slic_sigma)
+    fragments = slic(img_as_float(test_img), n_segments=frag_amount, sigma=slic_sigma)
 
     # Color each segment of the image with the segment mean value.
-    graphcut_input_img = paint_image_fragments(TEST_IMG, fragments)
+    graphcut_input_img = paint_image_fragments(test_img, fragments)
     graphcut_input_img = graphcut_input_img.astype('uint8')
 
     # Show SLIC output and coloring output
     fig = plt.figure("superpixel fragmentation")
     ax = fig.add_subplot(1, 2, 1)
-    cax = ax.imshow(mark_boundaries(img_as_float(TEST_IMG), fragments))
+    cax = ax.imshow(mark_boundaries(img_as_float(test_img), fragments))
     ax.set_title("mean value fragmentation color")
     ax = fig.add_subplot(1, 2, 2)
     cax = ax.imshow(graphcut_input_img)
 
     # Extract test patches from fragments
-    fragments_patches = extract_patches(TEST_IMG, fragments, patch_size)
+    fragments_patches = extract_patches(test_img, fragments, patch_size)
     fragments_nums = range(len(fragments_patches))
 
     # Compute distance
@@ -187,6 +192,11 @@ def segment_image(**kwargs):
     for i in range(len(min_dist)):
         frag_map[fragments == i] = min_dist[i]
 
+    index = 1
+    while os.path.isfile('%s%s%d%s' % (output_dir, 'result', index, '.tif')):
+        index = index + 1
+    plt.imsave('%s%s%d%s' % (output_dir, 'result', index, '.tif'), frag_map)
+
     fig = plt.figure("Naive Segmentation")
     ax = fig.add_subplot(1, 1, 1)
     cax = ax.imshow(frag_map)
@@ -207,7 +217,7 @@ def segment_image(**kwargs):
     # Cost matrix plot
     fig = plt.figure("cost matrix")
     ax = fig.add_subplot(1, 3, 1)
-    cax = ax.imshow(LABELS_IMG)
+    cax = ax.imshow(labels_img)
     ax.set_title("Train Labels")
     ax = fig.add_subplot(1, 3, 2)
     cax = ax.imshow(fragments)

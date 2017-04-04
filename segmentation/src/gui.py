@@ -4,18 +4,23 @@ from tkinter.filedialog import askdirectory
 import segment #our segmentation module
 
 def get_train():
+    """ callback function """
     train_img_path.set(askopenfilename())
-    
+
 def get_segment():
+    """ callback function """
     labels_img_path.set(askopenfilename())
 
 def get_new():
+    """ callback function """
     test_img_path.set(askopenfilename())
 
 def get_output():
+    """ callback function """
     output_dir.set(askdirectory())
 
 def compute():
+    """ callback function """
     # Prepare parameters
     kwargs = {}
     kwargs['TRAIN_IMG_PATH'] = train_img_path.get()
