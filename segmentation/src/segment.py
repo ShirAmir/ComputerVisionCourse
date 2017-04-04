@@ -105,7 +105,6 @@ def segment_image(**kwargs):
 
     :param kwargs: the parameter settings from the GUI
     """
-    print(kwargs)
     # Default parameters
     train_img_path = "../images/girl_train.jpg"
     labels_img_path = "../images/girl_train_labels.tif"
@@ -195,11 +194,12 @@ def segment_image(**kwargs):
     index = 1
     while os.path.isfile('%s%s%d%s' % (output_dir, 'result', index, '.tif')):
         index = index + 1
-    plt.imsave('%s%s%d%s' % (output_dir, 'result', index, '.tif'), frag_map)
-
-    fig = plt.figure("Naive Segmentation")
-    ax = fig.add_subplot(1, 1, 1)
-    cax = ax.imshow(frag_map)
+    res_path = '%s%s%d%s' % (output_dir, 'result', index, '.tif')
+    plt.imsave(res_path, frag_map)
+    return res_path
+    # fig = plt.figure("Naive Segmentation")
+    # ax = fig.add_subplot(1, 1, 1)
+    # cax = ax.imshow(frag_map)
 
     # Determine final segmentation with multi-label graph-cut
     """grabcut_thresh = 0.1
@@ -215,7 +215,7 @@ def segment_image(**kwargs):
     """
 
     # Cost matrix plot
-    fig = plt.figure("cost matrix")
+    """ fig = plt.figure("cost matrix")
     ax = fig.add_subplot(1, 3, 1)
     cax = ax.imshow(labels_img)
     ax.set_title("Train Labels")
@@ -229,4 +229,4 @@ def segment_image(**kwargs):
     ax.set_ylabel("Test Fragments")
     fig.colorbar(cax, label="Cost")
     fig.tight_layout()
-    plt.show()
+    plt.show() """

@@ -1,6 +1,10 @@
+# from PIL import Image, ImageTk
+import PIL.Image
+import PIL.ImageTk
 from tkinter import *
 from tkinter.filedialog import askopenfilename
 from tkinter.filedialog import askdirectory
+import cv2
 import segment #our segmentation module
 
 def get_train():
@@ -34,7 +38,13 @@ def compute():
     kwargs['SLIC_SIGMA'] = slic_sigma.get()
 
     # Compute segmentation
-    segment.segment_image(**kwargs)
+    res_path = segment.segment_image(**kwargs)
+    res = PIL.Image.open(res_path)
+    res = PIL.ImageTk.PhotoImage(res)
+    # image = Label(canvas, image=res, anchor=CENTER)
+    image.configure(image=res)
+    image.image = res
+    image.grid(row=1, column=2, columnspan=3, rowspan=12)
 
 root = Tk()
 root.title("Segmentation")
@@ -48,7 +58,6 @@ root.focus_set() # <-- move focus to this widget
 root.bind("<Escape>", lambda e: e.widget.quit())
 
 # Define all the variables
-image = []
 train_img_path = StringVar()
 labels_img_path = StringVar()
 test_img_path = StringVar()
@@ -76,10 +85,9 @@ btn5 = Button(root, font="Gisha 12 bold", fg='#006600', bg='#b3ffb3', command=co
 btn5.grid(row=5, column=0, padx=15, pady=0)
 
 # Main frame for showing results
-image_frame = Frame(relief=RIDGE, bd=5, width=0.75*w, height=0.75*h).grid(row=1, column=1, columnspan=5, rowspan=22, sticky=E)
-
-image = Label(image_frame, text="nanabanana", anchor=CENTER)
-image.grid(row=6, column=3)
+# image_frame = Frame(relief=RIDGE, bd=5, width=0.75*w, height=0.75*h).grid(row=1, column=1, columnspan=5, rowspan=22, sticky=E)
+canvas = Canvas(relief=RIDGE, bd=5, width=0.75*w, height=0.75*h).grid(row=1, column=1, columnspan=5, rowspan=22, sticky=E)
+image = Label(canvas, image="", anchor=CENTER)
 
 # Right parameter settings
 label1 = Label(root, font="Gisha 12", fg='#006600', bg='#ccffcc', text="Amount \n of Fragments:", width=15)
