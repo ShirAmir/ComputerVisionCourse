@@ -18,18 +18,18 @@ def get_output():
 def compute():
     # Prepare parameters
     kwargs = {}
-    kwargs['TRAIN_IMG_PATH'] = train_img_path
-    kwargs['LABELS_IMG_PATH'] = labels_img_path
-    kwargs['TEST_IMG_PATH'] = test_img_path
-    kwargs['OUTPUT_DIR'] = output_dir
-    kwargs['FRAG_NUM'] = frag_num
-    kwargs['PATCH_SIZE'] = patch_size
-    kwargs['GRABCUT_THRESH'] = grabcut_thresh
-    kwargs['GRABCUT_ITER'] = grabcut_iter
-    kwargs['SLIC_SIGMA'] = slic_sigma
+    kwargs['TRAIN_IMG_PATH'] = train_img_path.get()
+    kwargs['LABELS_IMG_PATH'] = labels_img_path.get()
+    kwargs['TEST_IMG_PATH'] = test_img_path.get()
+    kwargs['OUTPUT_DIR'] = output_dir.get()
+    kwargs['FRAG_AMOUNT'] = frag_amount.get()
+    kwargs['PATCH_SIZE'] = patch_size.get()
+    kwargs['GRABCUT_THRESH'] = grabcut_thresh.get()
+    kwargs['GRABCUT_ITER'] = grabcut_iter.get()
+    kwargs['SLIC_SIGMA'] = slic_sigma.get()
+
     # Compute segmentation
-    segment.segment_image()
-    return image
+    segment.segment_image(**kwargs)
 
 root = Tk()
 root.title("Segmentation")
@@ -48,7 +48,7 @@ train_img_path = StringVar()
 labels_img_path = StringVar()
 test_img_path = StringVar()
 output_dir = StringVar()
-frag_num = StringVar()
+frag_amount = StringVar()
 patch_size = StringVar()
 grabcut_thresh = StringVar()
 grabcut_iter = StringVar()
@@ -79,9 +79,9 @@ image.grid(row=6, column=3)
 # Right parameter settings
 label1 = Label(root, font="Gisha 12", fg='#006600', bg='#ccffcc', text="Amount \n of Fragments:", width=15)
 label1.grid(row=1, column=6, padx=0, pady=0)
-entry1 = Entry(root, font="Gisha 12", fg='#006600', textvariable=frag_num, width=12)
+entry1 = Entry(root, font="Gisha 12", fg='#006600', textvariable=frag_amount, width=12)
 entry1.grid(row=2, column=6, padx=15, pady=0)
-frag_num.set("100")
+frag_amount.set("100")
 
 label2 = Label(root, font="Gisha 12", fg='#006600', bg='#ccffcc', text="Patch Size:", width=12)
 label2.grid(row=3, column=6, padx=15, pady=0)

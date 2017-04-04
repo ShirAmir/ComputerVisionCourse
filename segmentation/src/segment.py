@@ -99,27 +99,51 @@ def paint_image_fragments(im_rgb, im_segments):
         cv2.waitKey(0)
 """
 
-def segment_image():
-    # initialize parameters
-    FRAG_AMOUNT = 100
-    # must be an odd number
-    PATCH_SIZE = 9
-    TRAIN_IMG_PATH = "../images/girl_train.jpg"
-    LABELS_IMG_PATH = "../images/girl_train_labels.tif"
-    TEST_IMG_PATH = "../images/girl_test.jpg"
+def segment_image(**kwargs):
+    print(kwargs)
+    # Default parameters
+    train_img_path = "../images/girl_train.jpg"
+    labels_img_path = "../images/girl_train_labels.tif"
+    test_img_path = "../images/girl_test.jpg"
+    output_dir = "../images"
+    frag_amount = 100
+    patch_size = 9 # should be an odd number
+    grabcut_thresh = 0.01
+    grabcut_iter = 5
+    slic_sigma = 5
+
+    # Change parameters specified by GUI
+    if kwargs.get('TRAIN_IMG_PATH') != None:
+        train_img_path = kwargs.get('TRAIN_IMG_PATH')
+    if kwargs.get('LABELS_IMG_PATH') != None:
+        labels_img_path = kwargs.get('LABELS_IMG_PATH')
+    if kwargs.get('TEST_IMG_PATH') != None:
+        test_img_path = kwargs.get('TEST_IMG_PATH')
+    if kwargs.get('OUTPUT_DIR') != None:
+        output_dir = kwargs.get('OUTPUT_DIR')
+    if kwargs.get('FRAG_AMOUNT') != None:
+        frag_amount = int(kwargs.get('FRAG_AMOUNT'))
+    if kwargs.get('PATCH_SIZE') != None:
+        patch_size = int(kwargs.get('PATCH_SIZE'))
+    if kwargs.get('GRABCUT_THRESH') != None:
+        grabcut_thresh = float(kwargs.get('GRABCUT_THRESH'))
+    if kwargs.get('GRABCUT_ITER') != None:
+        grabcut_iter = int(kwargs.get('GRABCUT_ITER'))
+    if kwargs.get('SLIC_SIGMA') != None:
+        slic_sigma = int(kwargs.get('SLIC_SIGMA'))
 
     # Load images
-    TRAIN_IMG = cv2.cvtColor(cv2.imread(TRAIN_IMG_PATH), cv2.COLOR_BGR2RGB)
-    LABELS_IMG = cv2.imread(LABELS_IMG_PATH, cv2.IMREAD_GRAYSCALE)
-    TEST_IMG = cv2.cvtColor(cv2.imread(TEST_IMG_PATH), cv2.COLOR_BGR2RGB)
+    TRAIN_IMG = cv2.cvtColor(cv2.imread(train_img_path), cv2.COLOR_BGR2RGB)
+    LABELS_IMG = cv2.imread(labels_img_path, cv2.IMREAD_GRAYSCALE)
+    TEST_IMG = cv2.cvtColor(cv2.imread(test_img_path), cv2.COLOR_BGR2RGB)
 
     # Extract train patches from each label in train image
-    train_labels_patches = extract_patches(TRAIN_IMG, LABELS_IMG, PATCH_SIZE)
+    train_labels_patches = extract_patches(TRAIN_IMG, LABELS_IMG, patch_size)
     labels_nums = range(len(train_labels_patches))
 
     # Compute SLIC fragmentation
     # Each pixel contains the key of its' fragment
-    fragments = slic(img_as_float(TEST_IMG), n_segments=FRAG_AMOUNT, sigma=5)
+    fragments = slic(img_as_float(TEST_IMG), n_segments=frag_amount, sigma=slic_sigma)
 
     # Color each segment of the image with the segment mean value.
     graphcut_input_img = paint_image_fragments(TEST_IMG, fragments)
@@ -134,12 +158,12 @@ def segment_image():
     cax = ax.imshow(graphcut_input_img)
 
     # Extract test patches from fragments
-    fragments_patches = extract_patches(TEST_IMG, fragments, PATCH_SIZE)
+    fragments_patches = extract_patches(TEST_IMG, fragments, patch_size)
     fragments_nums = range(len(fragments_patches))
 
     # Compute distance
     distance = np.zeros((len(fragments_nums), len(labels_nums)), dtype=np.float32)
-    M = float(PATCH_SIZE * PATCH_SIZE * 3)
+    M = float(patch_size**2 * 3)
     for frag_key in fragments_nums:
         frag_patches = fragments_patches[frag_key]
         for label_key in labels_nums:
@@ -168,7 +192,7 @@ def segment_image():
     cax = ax.imshow(frag_map)
 
     # Determine final segmentation with multi-label graph-cut
-    """GRABCUT_THRESH = 0.1
+    """grabcut_thresh = 0.1
     ITER = 5
     mask = np.zeros(graphcut_input_img.shape[:2],np.uint8)
     compute_mask(mask, l, fragments_nums, distance[:, l])
