@@ -59,8 +59,7 @@ def extract_patches(im_rgb, im_segments, patch=11):
             for patch_ind, pix_ind in enumerate(sample_indices):
                 roi = im_rgb[(i[pix_ind] - half_patch):(i[pix_ind] + half_patch + 1),
                              (j[pix_ind] - half_patch):(j[pix_ind] + half_patch + 1), :]
-                # Substract mean from patch		
-                roi = roi - np.mean(roi)
+                roi = roi - np.mean(roi) #Substract mean from patch
                 patches.append(roi)
         result.append(patches)
     return result
@@ -85,7 +84,7 @@ def paint_image_fragments(im_rgb, im_segments):
         # Color the segment in its mean value
         result[im_segments == seg_num, :] = mean_segment_val
     return result
-    
+
 """def compute_mask(mask, l, fragments_nums, distance):
     # loop over the unique segment values
     for f in fragments_nums:
@@ -100,7 +99,7 @@ def paint_image_fragments(im_rgb, im_segments):
         cv2.waitKey(0)
 """
 
-if __name__ == "__main__":
+def segment_image():
     # initialize parameters
     FRAG_AMOUNT = 100
     # must be an odd number
@@ -153,18 +152,16 @@ if __name__ == "__main__":
                 min_ssd = np.min(ssd)
                 cost_patches.append(min_ssd)
             distance[frag_key, label_key] = np.median(cost_patches)
-    print(distance)
 
     # Normalize distance values
     distance_limits = [np.min(distance), np.max(distance)]
     distance = np.interp(distance, distance_limits, [0, 1])
-    # print(distance)
 
-    # Naive Segmentation - Chosing Bst option in cost matrix
+    # Naive Segmentation - Choosing Best option in cost matrix
     min_dist = np.argmin(distance, axis=1)
     frag_map = np.zeros_like(fragments)
     for i in range(len(min_dist)):
-        frag_map[fragments==i] = min_dist[i]
+        frag_map[fragments == i] = min_dist[i]
 
     fig = plt.figure("Naive Segmentation")
     ax = fig.add_subplot(1, 1, 1)
@@ -174,7 +171,7 @@ if __name__ == "__main__":
     """GRABCUT_THRESH = 0.1
     ITER = 5
     mask = np.zeros(graphcut_input_img.shape[:2],np.uint8)
-    compute_mask(mask, l, fragments_nums, distance[:, l])        
+    compute_mask(mask, l, fragments_nums, distance[:, l])
     bgd_model = np.zeros((1, 65), np.float64)
     fgd_model = np.zeros((1, 65), np.float64)
     cv2.grabCut(graphcut_input_img, mask, None, bgd_model, fgd_model, ITER, cv2.GC_INIT_WITH_MASK)
