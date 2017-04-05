@@ -86,19 +86,19 @@ def paint_image_fragments(im_rgb, im_segments):
         result[im_segments == seg_num, :] = mean_segment_val
     return result
 
-"""def compute_mask(mask, l, fragments_nums, distance):
+def compute_mask(mask, label, fragments_nums, fragments, distance, thresh):
     # loop over the unique segment values
     for f in fragments_nums:
         # construct a mask for the segment
-       	temp = np.zeros(mask.shape[:2], dtype="uint8")
-        temp[segments == segVal] = 255
-        dist = distance[]
-    
-        # show the masked region
-        cv2.imshow("Mask", mask)
-        cv2.imshow("Applied", cv2.bitwise_and(image, image, mask = mask))
-        cv2.waitKey(0)
-"""
+        dist = distance[f][label]
+        if dist > 1-thresh:
+            mask[fragments == f] = cv2.GC_FGD
+        elif dist > 0.5:
+            mask[fragments == f] = cv2.GC_PR_FGD
+        elif dist > thresh:
+            mask[fragments == f] = cv2.GC_PR_BGD
+        else:
+            mask[fragments == f] = cv2.GC_BGD
 
 def segment_image(**kwargs):
     """ execute the segmentation itself
@@ -149,7 +149,7 @@ def segment_image(**kwargs):
     # Each pixel contains the key of its' fragment
     fragments = slic(img_as_float(test_img), n_segments=frag_amount, sigma=slic_sigma)
 
-    # Color each segment of the image with the segment mean value.
+    # Color each segment of the image with the segment mean value
     graphcut_input_img = paint_image_fragments(test_img, fragments)
     graphcut_input_img = graphcut_input_img.astype('uint8')
 
@@ -186,33 +186,32 @@ def segment_image(**kwargs):
     distance = np.interp(distance, distance_limits, [0, 1])
 
     # Naive Segmentation - Choosing Best option in cost matrix
-    min_dist = np.argmin(distance, axis=1)
+    """min_dist = np.argmin(distance, axis=1)
     frag_map = np.zeros_like(fragments)
     for i in range(len(min_dist)):
         frag_map[fragments == i] = min_dist[i]
 
+    fig = plt.figure("Naive Segmentation")
+    ax = fig.add_subplot(1, 1, 1)
+    cax = ax.imshow(frag_map)"""
+
+    # Determine final segmentation with multi-label graph-cut optimization
+    mask = np.zeros(graphcut_input_img.shape[:2], np.uint8)
+    l = 0
+    compute_mask(mask, l, fragments_nums, fragments, distance, grabcut_thresh)
+    bgd = np.zeros((1, 65), np.float64)
+    fgd = np.zeros((1, 65), np.float64)
+    cv2.grabCut(graphcut_input_img, mask, None, bgd, fgd, grabcut_iter, cv2.GC_INIT_WITH_MASK)
+    mask = np.where((mask == 2) | (mask == 0), 0, 1).astype('uint8')
+    graphcut_input_img = graphcut_input_img * mask[:, :, np.newaxis]
+
+    # find a file name that isn't taken
     index = 1
     while os.path.isfile('%s%s%d%s' % (output_dir, 'result', index, '.tif')):
         index = index + 1
-    res_path = '%s%s%d%s' % (output_dir, 'result', index, '.tif')
-    plt.imsave(res_path, frag_map)
-    return res_path
-    # fig = plt.figure("Naive Segmentation")
-    # ax = fig.add_subplot(1, 1, 1)
-    # cax = ax.imshow(frag_map)
 
-    # Determine final segmentation with multi-label graph-cut
-    """grabcut_thresh = 0.1
-    ITER = 5
-    mask = np.zeros(graphcut_input_img.shape[:2],np.uint8)
-    compute_mask(mask, l, fragments_nums, distance[:, l])
-    bgd_model = np.zeros((1, 65), np.float64)
-    fgd_model = np.zeros((1, 65), np.float64)
-    cv2.grabCut(graphcut_input_img, mask, None, bgd_model, fgd_model, ITER, cv2.GC_INIT_WITH_MASK)
-    mask = np.where((mask == 2) | (mask == 0), 0, 1).astype('uint8')
-    graphcut_input_img = graphcut_input_img * mask[:, :, np.newaxis]
-    plt.imshow(graphcut_input_img), plt.colorbar(), plt.show()
-    """
+    res_path = '%s%s%d%s' % (output_dir, 'result', index, '.tif')
+    plt.imsave(res_path, graphcut_input_img)
 
     # Cost matrix plot
     """ fig = plt.figure("cost matrix")
@@ -230,3 +229,6 @@ def segment_image(**kwargs):
     fig.colorbar(cax, label="Cost")
     fig.tight_layout()
     plt.show() """
+
+    # Return the result's file name to the GUI
+    return res_path

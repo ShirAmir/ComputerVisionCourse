@@ -44,7 +44,7 @@ def compute():
     # image = Label(canvas, image=res, anchor=CENTER)
     image.configure(image=res)
     image.image = res
-    image.grid(row=1, column=2, columnspan=3, rowspan=12)
+    image.grid(row=2, column=2, columnspan=3, rowspan=12)
 
 root = Tk()
 root.title("Segmentation")
@@ -73,17 +73,20 @@ headline.grid(row=0, column=0, columnspan=7, padx=10, pady=10)
 # Left input and output settings
 btn1 = Button(root, font="Gisha 12", fg='#006600', bg='#b3ffb3', command=get_train, text="Train Image", width=12)
 btn1.grid(row=1, column=0, padx=15, pady=0)
+train_img_path.set("../images/giraffes_train.jpg")
 btn2 = Button(root, font="Gisha 12", fg='#006600', bg='#b3ffb3', command=get_segment, text="Labeled Image", width=12)
 btn2.grid(row=2, column=0, padx=15, pady=0)
+labels_img_path.set("../images/giraffes_train_labels.tif")
 btn3 = Button(root, font="Gisha 12", fg='#006600', bg='#b3ffb3', command=get_new, text="Test Image", width=12)
 btn3.grid(row=3, column=0, padx=15, pady=0)
+test_img_path.set("../images/giraffes_test.jpg")
 btn4 = Button(root, font="Gisha 12", fg='#006600', bg='#b3ffb3', command=get_output, text="Output Path", width=12)
 btn4.grid(row=4, column=0, padx=15, pady=0)
+output_dir.set("../results/")
 btn5 = Button(root, font="Gisha 12 bold", fg='#006600', bg='#b3ffb3', command=compute, text="GO!", width=11)
 btn5.grid(row=5, column=0, padx=15, pady=0)
 
 # Main frame for showing results
-# image_frame = Frame(relief=RIDGE, bd=5, width=0.75*w, height=0.75*h).grid(row=1, column=1, columnspan=5, rowspan=22, sticky=E)
 canvas = Canvas(relief=RIDGE, bd=5, width=0.75*w, height=0.75*h).grid(row=1, column=1, columnspan=5, rowspan=22, sticky=E)
 image = Label(canvas, image="", anchor=CENTER)
 
@@ -92,7 +95,7 @@ label1 = Label(root, font="Gisha 12", fg='#006600', bg='#ccffcc', text="Amount \
 label1.grid(row=1, column=6, padx=0, pady=0)
 entry1 = Entry(root, font="Gisha 12", fg='#006600', textvariable=frag_amount, width=12)
 entry1.grid(row=2, column=6, padx=15, pady=0)
-frag_amount.set("100")
+frag_amount.set("400")
 
 label2 = Label(root, font="Gisha 12", fg='#006600', bg='#ccffcc', text="Patch Size:", width=12)
 label2.grid(row=3, column=6, padx=15, pady=0)
@@ -104,7 +107,7 @@ label3 = Label(root, font="Gisha 12", fg='#006600', bg='#ccffcc', text="Grabcut 
 label3.grid(row=5, column=6, padx=0, pady=0)
 entry3 = Entry(root, font="Gisha 12", fg='#006600', textvariable=grabcut_thresh, width=12)
 entry3.grid(row=6, column=6, padx=15, pady=0)
-grabcut_thresh.set("0.01")
+grabcut_thresh.set("0.001")
 
 label4 = Label(root, font="Gisha 12", fg='#006600', bg='#ccffcc', text="Grabcut \n Iterations:", width=12)
 label4.grid(row=7, column=6, padx=0, pady=0)
@@ -118,12 +121,8 @@ entry5 = Entry(root, font="Gisha 12", fg='#006600', textvariable=slic_sigma, wid
 entry5.grid(row=10, column=6, padx=15, pady=0)
 slic_sigma.set("5")
 
-footer = Label(root, font="Gisha 14", fg='#006600', bg='#ccffcc', text="Press Esc to leave", anchor=CENTER)
+explanations = "Press Esc to leave \n Press GO! once and be patient :)"
+footer = Label(root, font="Gisha 14", fg='#006600', bg='#ccffcc', text=explanations, anchor=CENTER)
 footer.grid(row=20, column=0, columnspan=7, padx=10, pady=10)
-
-# Label(root, textvariable=train_img_path).grid(column=1, row=0) 
-# Label(root, textvariable=labels_img_path).grid(column=1, row=1)
-# Label(root, textvariable=test_img_path).grid(column=1, row=2)
-# Label(root, textvariable=output_dir).grid(column=1, row=3)
 
 root.mainloop()
