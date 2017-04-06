@@ -10,6 +10,7 @@ Also, we use **Python 3.5.3** with the following primary modules:
   * Opencv 3.1.0
   * Scikit-image 0.12.3
   * Matplotlib 2.0.0
+  * Tk 8.5.18
 
 After setting up Anaconda, make sure all the following modules are up-to-date:
   * Cython >= 0.23
@@ -17,11 +18,12 @@ After setting up Anaconda, make sure all the following modules are up-to-date:
   * SciPy >= 0.17.0
   * Numpydoc >= 0.6
   * NetworkX >= 1.8
-  * Pillow (Pill) >= 2.1.0
+  * Pillow >= 2.1.0
   * PyWavelets >= 0.4.0
 
 This can be done by type `conda list` in the conda prompt and observe the different modules.  
 In case one needs to be installed or updated, simply type `conda module_name install` in the conda prompt. 
+OpenCV is installed by typing `conda install -c menpo opencv3=3.1.0` in the conda prompt.
   
 ### Assignments
 This course requires 5 assignments:
