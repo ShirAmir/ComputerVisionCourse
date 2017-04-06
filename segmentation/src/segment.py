@@ -198,6 +198,8 @@ def segment_image(**kwargs):
     # Normalize distance values
     # distance = np.interp(distance, distance_limits, [0, 1])
     distance = lerp(distance, [np.min(distance), np.max(distance)], [0, 1])
+    for f in fragments_nums:
+        distance[f, :] = lerp(distance[f, :], [np.min(distance[f, :]), np.max(distance[f, :])], [0, 1])
 
     # Naive Segmentation - Choosing Best option in cost matrix
     """min_dist = np.argmin(distance, axis=1)
