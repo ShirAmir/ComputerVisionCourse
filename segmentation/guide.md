@@ -33,12 +33,13 @@ In this case it's best to uninstall *PIL* and *Pillow* libraries by typing `cond
     <img src="utility/gui1.jpg" width="600" align="middle">  
     
 3. Choose input images by pressing the correlating buttons on the left:  
-    
-    <img src="utility/left_buttons.jpg" width="100" align="middle">  
+    <p>
+    <img src="utility/left_buttons.jpg" width="100" align="right">  
     
     * **Train Image** for choosing the trainning image.
     * **Labeled Image** for choosing the labeling of the trainning image. 
     * **Test Image** for choosing the image to be segmented. 
+    </p>
     
 4. When pressing one of the aforementioned buttons the file explorer will be opened:  
     
@@ -51,14 +52,15 @@ In this case it's best to uninstall *PIL* and *Pillow* libraries by typing `cond
     <img src="utility/left_button.jpg" width="100" align="middle">  
     
 6. Configure the algorithm parameters by using the entry on the right:  
-    
-    <img src="utility/right_buttons.jpg" width="100" align="middle">  
-    
+    <p>
+    <img src="utility/right_buttons.jpg" width="100" align="right">  
+
     * **Amount of Fragments** configures the amount of fragments in the SLIC algorithm.
     * **Patch Size** configures the size of the patches requiered in the distance determination process.
     * **Grabcut Threshold** configures the threshold requiered for Grabcut algorithm. 
     * **Grabcut Iterations** configures the amount of iterations of Grabcut algorithm.
     * **SLIC Sigma** conrigures the sigma variable (smoothness) of the fragments in SLIC algorithm.
+    </p>
     
 7. Once completed configurations press the button **GO!** to run the program.  
     
