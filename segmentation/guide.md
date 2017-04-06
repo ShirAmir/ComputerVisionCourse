@@ -20,25 +20,57 @@ In this case it's best to uninstall *PIL* and *Pillow* libraries by typing `cond
 `pip install pillow` in to the conda prompt. 
 
 ### Using Instructions
-1. Open the command line in `src` directory. 
-2. Run our GUI by typing `python gui.py` into the command line.
+1. Open the command line in `src` directory.  
+
+    <img src="utility/conda_prompt1.jpg" width="600" align="middle">  
+    
+2. Run our GUI by typing `python gui.py` into the command line.  
+    
+    <img src="utility/conda_prompt2.jpg" width="600" align="middle">    
+    
     At this point the GUI window will be opened:  
-3. Choose input images by pressing the correlating buttons on the left:
+    
+    <img src="utility/gui1.jpg" width="600" align="middle">  
+    
+3. Choose input images by pressing the correlating buttons on the left:  
+    
+    <img src="utility/left_buttons.jpg" width="100" align="middle">  
+    
     * **Train Image** for choosing the trainning image.
     * **Labeled Image** for choosing the labeling of the trainning image. 
     * **Test Image** for choosing the image to be segmented. 
-4. When pressing one of the aforementioned buttons the file explorer will be opened:
-    Then choose the requested image. 
-5. The output directory can also be altered in a similar way by pressing 'Output Directory'.
-6. Configure the algorithm parameters by using the entry on the right:
+    
+4. When pressing one of the aforementioned buttons the file explorer will be opened:  
+    
+    <img src="utility/file_explorer.jpg" width="500" align="middle">  
+    
+    Then choose the requested image.  
+    
+5. The output directory can also be altered in a similar way by pressing 'Output Directory'.  
+    
+    <img src="utility/left_button.jpg" width="100" align="middle">  
+    
+6. Configure the algorithm parameters by using the entry on the right:  
+    
+    <img src="utility/right_buttons.jpg" width="100" align="middle">  
+    
     * **Amount of Fragments** configures the amount of fragments in the SLIC algorithm.
     * **Patch Size** configures the size of the patches requiered in the distance determination process.
     * **Grabcut Threshold** configures the threshold requiered for Grabcut algorithm. 
     * **Grabcut Iterations** configures the amount of iterations of Grabcut algorithm.
     * **SLIC Sigma** conrigures the sigma variable (smoothness) of the fragments in SLIC algorithm.
-7. Once completed configurations press the button **GO!** to run the program.
-8. Wait pateintly (running time can take about 30 seconds) 
-9. The segmentation results will appear on screen and as a file in the output directory you specified earlier.
+    
+7. Once completed configurations press the button **GO!** to run the program.  
+    
+    <img src="utility/go_button.jpg" width="100" align="middle">  
+    
+8. Wait pateintly (running time can take about 30 seconds) at this time the **GO!** button will sink in:  
+    
+    <img src="utility/pressed_go_button.jpg" width="100" align="middle">  
+    
+9. The segmentation results will appear on screen and as a file in the output directory you specified earlier. 
+
+10. you can run the program multiple times by reconfiguring the parameters and pressing **GO!**.   
 
 #### Directory Tree
 
