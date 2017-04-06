@@ -1,17 +1,33 @@
 # Semantic Segmentation From a Training Image
-The program receives a training image, its' segmentation and a new similar image.
-The program then segments the new image according to the algorithm described in 
+The program receives a training image, its' segmentation and a new image in the same domain.
+Then, the program attempts to segments the new image using the training image labels, similarly to the algorithm described in 
 [this article](http://www.math.tau.ac.il/~dcor/online_papers/papers/Yaar05.pdf "Semantic Segmentation, Yaar Et al.").
 
 ### Algorithm & Implementation Details
+As said, our algorithm heavily relies on the algorithm described in the aforementioned article. Despite that, we implemented a few parts differently. Here is a general description of our algorithm:
 
+1. **Fragmentation** - Divide the tested image into many fragments (or superpixels) while trying to contain pixels from a single segment in each fragment. That is because later we attempt to merge sets of segments into a common label. 
+
+2. **Determine cost for each fragment and label** - In order to divide the fragments into the different labels, we must find a way to calculate the profitability of assigning a certain fragment to a certain label. We do so using *patching method*:
+
+    For each label in the training image we randomly chose several pixels and define a patch of a constant size around them. 
+    Thus, each label is attributed with a set of patches. 
+    Then for each fragment in the tested image we randomly chose several pixels and define a patch of the same constant size around them. Thus, each fragment is associated with a set of patches.  
+    Now, we use these multi-sets of patches to compute distances between each fragment and each label.
+    
+    <img src="utility/distance_algorithm.jpg" width="600" align="middle">  
+    
+    It is important to note that after computing the *MSE* we subtract the average from the result in order to pay attention to the details of the patch and diminish the effect of shading differences.
+    
+3. **Attribute each fragment to a label** - We've checked various ways and decided eventually on the following algorithm:
+    
 ### Results
 
 ### Building Instructions
 Building the project is pretty simple. 
 Just clone the `segmentation` directory into your computer.
 Before running the program, make sure your python configuration complies with  
-[README requests](../README.md "README file").  
+[README](../README.md "README file") specifications.  
 
 #### GUI Doesn't Work
 In some systems the GUI may not work because new versions of *PIL* library desist to contain *TK* binding files. 
