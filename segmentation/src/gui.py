@@ -95,7 +95,7 @@ label1 = Label(root, font="Gisha 12", fg='#006600', bg='#ccffcc', text="Amount \
 label1.grid(row=1, column=6, padx=0, pady=0)
 entry1 = Entry(root, font="Gisha 12", fg='#006600', textvariable=frag_amount, width=12)
 entry1.grid(row=2, column=6, padx=15, pady=0)
-frag_amount.set("400")
+frag_amount.set("900")
 
 label2 = Label(root, font="Gisha 12", fg='#006600', bg='#ccffcc', text="Patch Size:", width=12)
 label2.grid(row=3, column=6, padx=15, pady=0)
@@ -107,13 +107,13 @@ label3 = Label(root, font="Gisha 12", fg='#006600', bg='#ccffcc', text="Grabcut 
 label3.grid(row=5, column=6, padx=0, pady=0)
 entry3 = Entry(root, font="Gisha 12", fg='#006600', textvariable=grabcut_thresh, width=12)
 entry3.grid(row=6, column=6, padx=15, pady=0)
-grabcut_thresh.set("0.001")
+grabcut_thresh.set("0.0001")
 
 label4 = Label(root, font="Gisha 12", fg='#006600', bg='#ccffcc', text="Grabcut \n Iterations:", width=12)
 label4.grid(row=7, column=6, padx=0, pady=0)
 entry4 = Entry(root, font="Gisha 12", fg='#006600', textvariable=grabcut_iter, width=12)
 entry4.grid(row=8, column=6, padx=15, pady=0)
-grabcut_iter.set("5")
+grabcut_iter.set("10")
 
 label5 = Label(root, font="Gisha 12", fg='#006600', bg='#ccffcc', text="SLIC Sigma:", width=12)
 label5.grid(row=9, column=6, padx=0, pady=0)

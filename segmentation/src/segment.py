@@ -86,6 +86,20 @@ def paint_image_fragments(im_rgb, im_segments):
         result[im_segments == seg_num, :] = mean_segment_val
     return result
 
+def lerp(data, old_range, new_range):
+    """ preform linear interpolation
+
+    :param data: the data to be interpolated
+    :param old_range: an array containing old minimum and maximum. i.e. [10,17]
+    :param new_range: an array containing new minimum and maximum. i.e. [0,1]
+    """
+    a = (new_range[1] - new_range[0]) / (old_range[1] - old_range[0])
+    new_data = data.copy()
+    new_data = new_data - old_range[0]
+    new_data = new_data * a
+    new_data = new_data + new_range[0]
+    return new_data
+
 def compute_mask(mask, label, fragments_nums, fragments, distance, thresh):
     # loop over the unique segment values
     for f in fragments_nums:
@@ -180,10 +194,10 @@ def segment_image(**kwargs):
                 min_ssd = np.min(ssd)
                 cost_patches.append(min_ssd)
             distance[frag_key, label_key] = np.median(cost_patches)
-
+    
     # Normalize distance values
-    distance_limits = [np.min(distance), np.max(distance)]
-    distance = np.interp(distance, distance_limits, [0, 1])
+    # distance = np.interp(distance, distance_limits, [0, 1])
+    distance = lerp(distance, [np.min(distance), np.max(distance)], [0, 1])
 
     # Naive Segmentation - Choosing Best option in cost matrix
     """min_dist = np.argmin(distance, axis=1)
