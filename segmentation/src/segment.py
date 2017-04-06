@@ -114,6 +114,25 @@ def compute_mask(mask, label, fragments_nums, fragments, distance, thresh):
         else:
             mask[fragments == f] = cv2.GC_BGD
 
+def compute_mask(fragments, distance, threshold, maybe_threshold):
+    mask = np.zeros(fragments.shape, np.uint8)
+    unique_fragments = np.unique(fragments)
+    for frag_num in unique_fragments:
+        frag_dist_from_label = distance[frag_num]
+        if frag_dist_from_label > (1-threshold):
+            # fragment is positively background
+            mask[fragments == frag_num] = cv2.GC_BGD
+        elif frag_dist_from_label > maybe_threshold:
+            # fragment is maybe background
+            mask[fragments == frag_num] = cv2.GC_PR_BGD
+        elif frag_dist_from_label < threshold:
+            # fragment is positively foreground
+            mask[fragments == frag_num] = cv2.GC_FGD
+        else:
+            # fragment is maybe foreground
+            mask[fragments == frag_num] = cv2.GC_PR_FGD
+    return mask
+
 def segment_image(**kwargs):
     """ execute the segmentation itself
 
@@ -194,7 +213,7 @@ def segment_image(**kwargs):
                 min_ssd = np.min(ssd)
                 cost_patches.append(min_ssd)
             distance[frag_key, label_key] = np.median(cost_patches)
-    
+
     # Normalize distance values
     # distance = np.interp(distance, distance_limits, [0, 1])
     distance = lerp(distance, [np.min(distance), np.max(distance)], [0, 1])
@@ -202,24 +221,56 @@ def segment_image(**kwargs):
         distance[f, :] = lerp(distance[f, :], [np.min(distance[f, :]), np.max(distance[f, :])], [0, 1])
 
     # Naive Segmentation - Choosing Best option in cost matrix
-    """min_dist = np.argmin(distance, axis=1)
+    min_dist = np.argmin(distance, axis=1)
     frag_map = np.zeros_like(fragments)
     for i in range(len(min_dist)):
         frag_map[fragments == i] = min_dist[i]
 
-    fig = plt.figure("Naive Segmentation")
+    """fig = plt.figure("Naive Segmentation")
     ax = fig.add_subplot(1, 1, 1)
     cax = ax.imshow(frag_map)"""
 
     # Determine final segmentation with multi-label graph-cut optimization
-    mask = np.zeros(graphcut_input_img.shape[:2], np.uint8)
+    """mask = np.zeros(graphcut_input_img.shape[:2], np.uint8)
     l = 0
     compute_mask(mask, l, fragments_nums, fragments, distance, grabcut_thresh)
     bgd = np.zeros((1, 65), np.float64)
     fgd = np.zeros((1, 65), np.float64)
     cv2.grabCut(graphcut_input_img, mask, None, bgd, fgd, grabcut_iter, cv2.GC_INIT_WITH_MASK)
     mask = np.where((mask == 2) | (mask == 0), 0, 1).astype('uint8')
-    graphcut_input_img = graphcut_input_img * mask[:, :, np.newaxis]
+    test_img_result = graphcut_input_img * mask[:, :, np.newaxis]"""
+
+    # Determine final segmentation with multi-label graph-cut
+    min_t = np.min(distance, 1)
+    max_t = np.max(distance, 1)
+    mean_min = np.mean(min_t)
+    mean_max = np.mean(max_t)
+    maybe_threshold = (mean_min + mean_max) / 2
+    graphcut_labeling = np.ones([np.size(test_img, 0), np.size(test_img, 1), len(labels_nums)], np.float32) * np.nan
+    for label_key in labels_nums:
+        mask = compute_mask(fragments, distance[:, label_key], grabcut_thresh, maybe_threshold)
+        temp_mask = mask.copy()
+        unique_fg_bg_vals = np.unique(mask)
+        if np.logical_and(np.logical_or(cv2.GC_FGD in unique_fg_bg_vals, cv2.GC_PR_FGD in unique_fg_bg_vals), \
+                          np.logical_or(cv2.GC_BGD in unique_fg_bg_vals, cv2.GC_PR_BGD in unique_fg_bg_vals)):
+            bgd_model = np.zeros((1, 65), np.float64)
+            fgd_model = np.zeros((1, 65), np.float64)
+            cv2.grabCut(graphcut_input_img, mask, None, bgd_model, fgd_model, grabcut_iter, cv2.GC_INIT_WITH_MASK)
+            foreground_mask = np.logical_or(mask == cv2.GC_FGD, mask == cv2.GC_PR_FGD)
+
+            v = distance[:, label_key]
+            cost = v[fragments]
+            cost[~foreground_mask] = np.nan
+            graphcut_labeling[:, :, label_key] = cost
+
+    # Map of fragments that wasn't assigned to any label as foreground
+    invalid_map = np.all(np.isnan(graphcut_labeling), axis=2)
+    graphcut_labeling[invalid_map, :] = 0
+    # Create result image by taking the best label for each fragment
+    # according to the label score and the graphcut mapping results
+    test_img_result = np.nanargmin(graphcut_labeling, axis=2)
+    # If there's a fragment that was not chosen as foreground by any label - assign to the best label (naive)
+    test_img_result[invalid_map] = frag_map[invalid_map]
 
     # find a file name that isn't taken
     index = 1
@@ -227,7 +278,7 @@ def segment_image(**kwargs):
         index = index + 1
 
     res_path = '%s%s%d%s' % (output_dir, 'result', index, '.tif')
-    plt.imsave(res_path, graphcut_input_img)
+    plt.imsave(res_path, test_img_result)
 
     # Cost matrix plot
     """ fig = plt.figure("cost matrix")
