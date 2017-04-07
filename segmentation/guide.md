@@ -31,7 +31,7 @@ Hence, we matched every fragment to its closest label of all the labels which cl
 
 ### Results
 
-In this section we will present several results: These results are also avaliable in [results](/results) directory.
+In this section we will present several results: These results are also avaliable in [results](results) directory.
 
 #### Giraffes
 Amount of Fragments: 900, Patch Size: 9, Grabcut Threshold: 0.0001, Grabcut Iterations: 10, SLIC Sigma: 5
@@ -44,7 +44,7 @@ Amount of Fragments: 700, Patch Size: 9, Grabcut Threshold: 0.0001, Grabcut Iter
 <img src="results/result4.tif" width="200" align="middle">  
 
 #### Texture
-Amount of Fragments: 700, Patch Size: 9, Grabcut Threshold: 0.0001, Grabcut Iterations: 10, SLIC Sigma: 5
+Amount of Fragments: 400, Patch Size: 9, Grabcut Threshold: 0.0001, Grabcut Iterations: 10, SLIC Sigma: 5
 
 <img src="results/result1.tif" width="200" align="middle">  
 
@@ -134,22 +134,23 @@ This is the tree of our project:
 ```
 segmentation 
 ├── results
+├── utility 
 ├── images
 │   ├── image_test
 │   ├── image_train
-│   ├── image_train_labels
 │   └── ...
 ├── src  
-|   ├── gui.py  
-|   └── segment.py
+│   ├── gui.py 
+│   └── segment.py 
 └── guide.md 
 ```
 
 The sub-directory `src` contains all our code.
 `segment.py` contains the implementation of the segmentation algorithm, while `gui.py` contains
 the code of our graphical interface.  
-In addition, the sub-directory `results` is the default location for the outputted images. 
-Also, all the images we used for testing our program can be found in `images`. 
+In addition, the sub-directory `results` is the default location for the outputted images and contains a few examples. 
+Also, all the images we used for testing our program can be found in `images`.
+The directory `ulitily` contains images that appear in this guide. 
 We took most of our testing images from [pixabay](https://pixabay.com).
 Then, we used Photoshop to create the labels. We saved the labels in the following format: 
 An image with k segments 0 1 ... k-1 is saved such that every pixel from segment x is valued by x. 

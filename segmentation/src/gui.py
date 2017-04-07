@@ -95,7 +95,7 @@ label1 = Label(root, font="Gisha 12", fg='#006600', bg='#ccffcc', text="Amount \
 label1.grid(row=1, column=6, padx=0, pady=0)
 entry1 = Entry(root, font="Gisha 12", fg='#006600', textvariable=frag_amount, width=12)
 entry1.grid(row=2, column=6, padx=15, pady=0)
-frag_amount.set("900")
+frag_amount.set("400")
 
 label2 = Label(root, font="Gisha 12", fg='#006600', bg='#ccffcc', text="Patch Size:", width=12)
 label2.grid(row=3, column=6, padx=15, pady=0)
