@@ -1,8 +1,8 @@
 """ Semantic Segmentation from Training Image """
 # *************************************************
 # *** Semantic Segmentation from Training Image ***
-# ***************** Merav Joseph *****************
-# ******************* Shir Amir *******************
+# ************ Merav Joseph 200652063 *************
+# ************* Shir Amir 209712801 ***************
 # *************************************************
 
 import os.path

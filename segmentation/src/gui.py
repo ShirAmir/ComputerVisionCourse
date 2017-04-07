@@ -1,4 +1,8 @@
-# from PIL import Image, ImageTk
+# *************************************************
+# *** Semantic Segmentation from Training Image ***
+# ************ Merav Joseph 200652063 *************
+# ************* Shir Amir 209712801 ***************
+# *************************************************
 import PIL.Image
 import PIL.ImageTk
 from tkinter import *

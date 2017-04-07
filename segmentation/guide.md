@@ -1,4 +1,6 @@
 # Semantic Segmentation From a Training Image
+**Merav Joseph 200652063 & Shir Amir 209712801**
+
 The program receives a training image, its' segmentation and a new image in the same domain.
 Then, the program attempts to segments the new image using the training image labels, similarly to the algorithm described in 
 [this article](http://www.math.tau.ac.il/~dcor/online_papers/papers/Yaar05.pdf "Semantic Segmentation, Yaar Et al.").
@@ -6,9 +8,11 @@ Then, the program attempts to segments the new image using the training image la
 ### Algorithm & Implementation Details
 As said, our algorithm heavily relies on the algorithm described in the aforementioned article. Despite that, we implemented a few parts differently. Here is a general description of our algorithm:
 
-1. **Fragmentation** - Divide the tested image into many fragments (or superpixels) while trying to make sure each fragment contains pixels from a single segment. That is because later we attempt to merge sets of segments into a common label. 
+1. **Fragmentation** - Divide the tested image into many fragments (or *superpixels*) while trying to make sure each fragment contains pixels from a single segment. 
+That is because later we attempt to merge sets of fragments into a common label. We implemented that using "Skicit-Image"'s *SLIC* segmentation.
 
-2. **Determine cost for each fragment and label** - In order to divide the fragments into the different labels, we must find a way to calculate the profitability of assigning a certain fragment to a certain label. We do so using *patching method*:
+2. **Determine cost for each fragment and label** - In order to attribute the fragments to the different labels, we must find a way to calculate the profitability of assigning a certain fragment to a certain label.
+We do so using *patching method*:
 
     For each label in the training image we randomly chose several pixels and define a patch of a constant size around them. 
     Thus, each label is attributed with a set of patches. 
@@ -17,17 +21,24 @@ As said, our algorithm heavily relies on the algorithm described in the aforemen
     
     <img src="utility/distance_algorithm.jpg" width="400" align="middle">  
     
-    It is important to note that when acquiring the patches we subtract the average color of each patch from itself in order to diminish the affect of shadows and high contrasted areas.
+    It is important to note that when acquiring patches we subtract the average color of each patch from itself in order to diminish the affect of shadows and high contrast areas.
     
-3. **Attribute each fragment to a label** - We decided to use the Grabcut algorithm and apply it for several labels. Grabcut openCV function requieres input in range [0..1] so we interpolated the distances to that range.  
+3. **Attribute each fragment to a label** - At first, we thought it would suffice to attribute each fragment to a label in a 
+*naive scheme* - each fragment belongs to the label it is closest to. Then after running a few examples, we understood that this simple method doesn't take in account geographical aspects which are crucial for successful segmentation.  
+Then, we decided to use the *Grabcut* algorithm and apply it for several labels. Grabcut openCV function requieres input in range [0..1] so we interpolated the distances to that range.  
+Also, we noticed that Grabcut works on pixels rather than fragments, thus in order to have all the pixels of the same fragment be attributed to a certain label,
+the input image we gave Grabcut is the fragmented image in which each fragment contains its' average color.   
 Grabcut requires a mask that will assist in determining background and foreground in an image. A pixel in the mask can hold 4 different values: Background, Foreground, Maybe Background and Maybe Foreground.
-We were recommended by our lecturer to compute the mask by determining a threshold such that all values over 1-threshold will be BG, under threshold will be FG. Now, over 0.5 will be probably BG and under 0.5 will be probably FG.  
+We were recommended by our lecturer to compute the mask by determining a threshold such that all values over 1-threshold will be BG, under threshold will be FG.
+Now, over 0.5 will be probably BG and under 0.5 will be probably FG.  
 Thus, 0.5 could be reffered to as a "maybe threshold". In our enhancements we decided to alter the "maybe threshold" to a more robust result by setting it as the average between mean minimum and mean maximum. 
 This allows us to overcome the global segmentation in cases were the distances are not distrbuted uniformly.    
-Eventually, we used Grabcut to see wich fragments belong to each label. Each grabcut result told us wich fragments a label attributes to itself. 
-Now, all we needed to determine is which labels gets a fragment if several labels claimed it.  
-We used a naive method - the closest label of all the labels who claimed the fragment receives it. 
+Eventually, we used Grabcut to see which fragments belong to each label. Each grabcut result told us wich fragments a label attributes to itself. 
+Now, all we needed to determine is which label gets a fragment if several labels claimed it.  
+We used the naive voting scheme - the closest label of all the labels who claimed the fragment receives it. 
 Hence, we matched every fragment to its closest label of all the labels which claimed it. When there is a fragment that isn't claimed by anyone we attributed it to its closest label of all the labels.
+
+<img src="utility/img_in_process.png" width="800" align="middle">  
 
 ### Results
 
