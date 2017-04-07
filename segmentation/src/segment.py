@@ -15,7 +15,6 @@ import cv2
 
 def set_img_border(image, border_size, border_value=-1):
     """ confine borders so they wouldn't be chosen as patches.
-
     :param image: the image to be confined
     :param border_size: the thickness of the border
     :param border_value: the value of the border pixels
@@ -30,7 +29,6 @@ def set_img_border(image, border_size, border_value=-1):
 
 def extract_patches(im_rgb, im_segments, patch=11):
     """ creates patches for each segment.
-
     :param im_rgb: the original image
     :param im_segments: the segmented image
     :param patch:  the edge size of the patch
@@ -67,7 +65,6 @@ def extract_patches(im_rgb, im_segments, patch=11):
 
 def paint_image_fragments(im_rgb, im_segments):
     """ color each segment of the image with the mean value of the segment.
-
     :param im_rgb: the original image
     :param im_segments: the segmented image
     :return: the original image with painted segments according to their mean value
@@ -86,37 +83,17 @@ def paint_image_fragments(im_rgb, im_segments):
         result[im_segments == seg_num, :] = mean_segment_val
     return result
 
-def lerp(data, old_range, new_range):
-    """ preform linear interpolation
-
-    :param data: the data to be interpolated
-    :param old_range: an array containing old minimum and maximum. i.e. [10,17]
-    :param new_range: an array containing new minimum and maximum. i.e. [0,1]
-    """
-    a = (new_range[1] - new_range[0]) / (old_range[1] - old_range[0])
-    new_data = data.copy()
-    new_data = new_data - old_range[0]
-    new_data = new_data * a
-    new_data = new_data + new_range[0]
-    return new_data
-
-def compute_mask(mask, label, fragments_nums, fragments, distance, thresh):
-    # loop over the unique segment values
-    for f in fragments_nums:
-        # construct a mask for the segment
-        dist = distance[f][label]
-        if dist > 1-thresh:
-            mask[fragments == f] = cv2.GC_FGD
-        elif dist > 0.5:
-            mask[fragments == f] = cv2.GC_PR_FGD
-        elif dist > thresh:
-            mask[fragments == f] = cv2.GC_PR_BGD
-        else:
-            mask[fragments == f] = cv2.GC_BGD
-
 def compute_mask(fragments, distance, threshold, maybe_threshold):
+    """ Create a mask for grabcut of a certain label
+    :param fragments: The fragmented images, when every pixels contains its fragment's index
+    :param distance: The distance matrix column of the current label
+    :param threshold: The threshold to determine absolute background / foreground
+    :param maybe_threshold: The threshold to determine probable background / foreground
+    :param kwargs: the parameter settings from the GUI
+    """
     mask = np.zeros(fragments.shape, np.uint8)
     unique_fragments = np.unique(fragments)
+    # for each fragment check
     for frag_num in unique_fragments:
         frag_dist_from_label = distance[frag_num]
         if frag_dist_from_label > (1-threshold):
@@ -135,7 +112,6 @@ def compute_mask(fragments, distance, threshold, maybe_threshold):
 
 def segment_image(**kwargs):
     """ execute the segmentation itself
-
     :param kwargs: the parameter settings from the GUI
     """
     # Default parameters
@@ -144,7 +120,7 @@ def segment_image(**kwargs):
     test_img_path = "../images/girl_test.jpg"
     output_dir = "../results/"
     frag_amount = 100
-    patch_size = 9 # should be an odd number
+    patch_size = 9
     grabcut_thresh = 0.01
     grabcut_iter = 5
     slic_sigma = 5
@@ -201,13 +177,17 @@ def segment_image(**kwargs):
     # Compute distance
     distance = np.zeros((len(fragments_nums), len(labels_nums)), dtype=np.float32)
     M = float(patch_size**2 * 3)
+    # For each fragment
     for frag_key in fragments_nums:
         frag_patches = fragments_patches[frag_key]
+        # For each label
         for label_key in labels_nums:
             label_patches = train_labels_patches[label_key]
             label_patches_mat = np.stack(label_patches)
             cost_patches = []
+            # for each patch of this fragment
             for frag_p in frag_patches:
+                # compute cost between fragment patch and label patch
                 diff_sqr = ((label_patches_mat - frag_p)/M)**2
                 ssd = np.sum(diff_sqr.reshape((label_patches_mat.shape[0], -1)), axis=1)
                 min_ssd = np.min(ssd)
@@ -215,38 +195,27 @@ def segment_image(**kwargs):
             distance[frag_key, label_key] = np.median(cost_patches)
 
     # Normalize distance values
-    # distance = np.interp(distance, distance_limits, [0, 1])
-    distance = lerp(distance, [np.min(distance), np.max(distance)], [0, 1])
-    for f in fragments_nums:
-        distance[f, :] = lerp(distance[f, :], [np.min(distance[f, :]), np.max(distance[f, :])], [0, 1])
+    # When normalizing, crop the range to avoid distant outliers
+    valid_percentile = 99
+    distance_limits = [np.min(distance), np.percentile(distance, valid_percentile)]
+    distance[np.where(distance > distance_limits[1])] = distance_limits[1]
+    distance = np.interp(distance, distance_limits, [0, 1])
 
-    # Naive Segmentation - Choosing Best option in cost matrix
+    # Naive Segmentation - Choosing the best option in distance matrix
     min_dist = np.argmin(distance, axis=1)
     frag_map = np.zeros_like(fragments)
     for i in range(len(min_dist)):
         frag_map[fragments == i] = min_dist[i]
 
-    """fig = plt.figure("Naive Segmentation")
-    ax = fig.add_subplot(1, 1, 1)
-    cax = ax.imshow(frag_map)"""
-
-    # Determine final segmentation with multi-label graph-cut optimization
-    """mask = np.zeros(graphcut_input_img.shape[:2], np.uint8)
-    l = 0
-    compute_mask(mask, l, fragments_nums, fragments, distance, grabcut_thresh)
-    bgd = np.zeros((1, 65), np.float64)
-    fgd = np.zeros((1, 65), np.float64)
-    cv2.grabCut(graphcut_input_img, mask, None, bgd, fgd, grabcut_iter, cv2.GC_INIT_WITH_MASK)
-    mask = np.where((mask == 2) | (mask == 0), 0, 1).astype('uint8')
-    test_img_result = graphcut_input_img * mask[:, :, np.newaxis]"""
-
     # Determine final segmentation with multi-label graph-cut
+    # Define the probable threshold as the average of average minimum and average maximum
     min_t = np.min(distance, 1)
     max_t = np.max(distance, 1)
     mean_min = np.mean(min_t)
     mean_max = np.mean(max_t)
     maybe_threshold = (mean_min + mean_max) / 2
     graphcut_labeling = np.ones([np.size(test_img, 0), np.size(test_img, 1), len(labels_nums)], np.float32) * np.nan
+    #for each label execute grabcut algorithm
     for label_key in labels_nums:
         mask = compute_mask(fragments, distance[:, label_key], grabcut_thresh, maybe_threshold)
         temp_mask = mask.copy()
@@ -272,30 +241,14 @@ def segment_image(**kwargs):
     # If there's a fragment that was not chosen as foreground by any label - assign to the best label (naive)
     test_img_result[invalid_map] = frag_map[invalid_map]
 
-    # find a file name that isn't taken
+    # Find a file name that isn't taken
     index = 1
     while os.path.isfile('%s%s%d%s' % (output_dir, 'result', index, '.tif')):
         index = index + 1
 
+    # Save the result
     res_path = '%s%s%d%s' % (output_dir, 'result', index, '.tif')
     plt.imsave(res_path, test_img_result)
-
-    # Cost matrix plot
-    """ fig = plt.figure("cost matrix")
-    ax = fig.add_subplot(1, 3, 1)
-    cax = ax.imshow(labels_img)
-    ax.set_title("Train Labels")
-    ax = fig.add_subplot(1, 3, 2)
-    cax = ax.imshow(fragments)
-    ax.set_title("Test Fragments")
-    ax = fig.add_subplot(1, 3, 3)
-    cax = ax.imshow(distance)
-    ax.set_title("Cost matrix")
-    ax.set_xlabel("Train Labels")
-    ax.set_ylabel("Test Fragments")
-    fig.colorbar(cax, label="Cost")
-    fig.tight_layout()
-    plt.show() """
-
+    
     # Return the result's file name to the GUI
     return res_path

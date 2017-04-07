@@ -6,7 +6,7 @@ Then, the program attempts to segments the new image using the training image la
 ### Algorithm & Implementation Details
 As said, our algorithm heavily relies on the algorithm described in the aforementioned article. Despite that, we implemented a few parts differently. Here is a general description of our algorithm:
 
-1. **Fragmentation** - Divide the tested image into many fragments (or superpixels) while trying to contain pixels from a single segment in each fragment. That is because later we attempt to merge sets of segments into a common label. 
+1. **Fragmentation** - Divide the tested image into many fragments (or superpixels) while trying to make sure each fragment contains pixels from a single segment. That is because later we attempt to merge sets of segments into a common label. 
 
 2. **Determine cost for each fragment and label** - In order to divide the fragments into the different labels, we must find a way to calculate the profitability of assigning a certain fragment to a certain label. We do so using *patching method*:
 
@@ -17,11 +17,40 @@ As said, our algorithm heavily relies on the algorithm described in the aforemen
     
     <img src="utility/distance_algorithm.jpg" width="600" align="middle">  
     
-    It is important to note that after computing the *MSE* we subtract the average from the result in order to pay attention to the details of the patch and diminish the effect of shading differences.
+    It is important to note that when acquiring the patches we subtract the average color of each patch from itself in order to diminish the affect of shadows and high contrasted areas.
     
 3. **Attribute each fragment to a label** - We've checked various ways and decided eventually on the following algorithm:
     
 ### Results
+
+In this section we will present several results: These results are also avaliable in [results](/results) directory.
+
+#### Giraffes
+Amount of Fragments: 900, Patch Size: 9, Grabcut Threshold: 0.0001, Grabcut Iterations: 10, SLIC Sigma: 5
+
+<img src="/results/result5.tif" width="600" align="middle">  
+
+#### Dog
+Amount of Fragments: 700, Patch Size: 9, Grabcut Threshold: 0.0001, Grabcut Iterations: 10, SLIC Sigma: 5
+
+<img src="/results/result4.tif" width="600" align="middle">  
+
+#### Texture
+Amount of Fragments: 700, Patch Size: 9, Grabcut Threshold: 0.0001, Grabcut Iterations: 10, SLIC Sigma: 5
+
+<img src="/results/result1.tif" width="600" align="middle">  
+
+#### Girl
+Amount of Fragments: 400, Patch Size: 9, Grabcut Threshold: 0.001, Grabcut Iterations: 7, SLIC Sigma: 5
+
+<img src="/results/result2.tif" width="600" align="middle">  
+
+#### Vegtables
+Amount of Fragments: 900, Patch Size: 9, Grabcut Threshold: 0.001, Grabcut Iterations: 5, SLIC Sigma: 5
+
+<img src="/results/result3.tif" width="600" align="middle">  
+
+***NOTE:*** Our algorithm is not perfect and has its own outliers yet some of them are caused by the resolution of the segmentation.
 
 ### Building Instructions
 Building the project is pretty simple. 
@@ -88,7 +117,7 @@ In this case it's best to uninstall *PIL* and *Pillow* libraries by typing `cond
     
 9. The segmentation results will appear on screen and as a file in the output directory you specified earlier. 
 
-10. you can run the program multiple times by reconfiguring the parameters and pressing **GO!**.   
+10. You can run the program multiple times by reconfiguring the parameters and pressing **GO!**.   
 
 #### Directory Tree
 

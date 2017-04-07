@@ -47,7 +47,7 @@ def compute():
     image.grid(row=2, column=2, columnspan=3, rowspan=12)
 
 root = Tk()
-root.title("Segmentation")
+root.title("Segmentation2")
 root.configure(background='#ccffcc')
 w, h = root.winfo_screenwidth(), root.winfo_screenheight()
 root.geometry("%dx%d+0+0" % (w, h))
