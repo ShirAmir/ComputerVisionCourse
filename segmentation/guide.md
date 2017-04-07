@@ -15,12 +15,20 @@ As said, our algorithm heavily relies on the algorithm described in the aforemen
     Then for each fragment in the tested image we randomly chose several pixels and define a patch of the same constant size around them. Thus, each fragment is associated with a set of patches.  
     Now, we use these multi-sets of patches to compute distances between each fragment and each label.
     
-    <img src="utility/distance_algorithm.jpg" width="600" align="middle">  
+    <img src="utility/distance_algorithm.jpg" width="400" align="middle">  
     
     It is important to note that when acquiring the patches we subtract the average color of each patch from itself in order to diminish the affect of shadows and high contrasted areas.
     
-3. **Attribute each fragment to a label** - We've checked various ways and decided eventually on the following algorithm:
-    
+3. **Attribute each fragment to a label** - We decided to use the Grabcut algorithm and apply it for several labels. Grabcut openCV function requieres input in range [0..1] so we interpolated the distances to that range.  
+Grabcut requires a mask that will assist in determining background and foreground in an image. A pixel in the mask can hold 4 different values: Background, Foreground, Maybe Background and Maybe Foreground.
+We were recommended by our lecturer to compute the mask by determining a threshold such that all values over 1-threshold will be BG, under threshold will be FG. Now, over 0.5 will be probably BG and under 0.5 will be probably FG.  
+Thus, 0.5 could be reffered to as a "maybe threshold". In our enhancements we decided to alter the "maybe threshold" to a more robust result by setting it as the average between mean minimum and mean maximum. 
+This allows us to overcome the global segmentation in cases were the distances are not distrbuted uniformly.    
+Eventually, we used Grabcut to see wich fragments belong to each label. Each grabcut result told us wich fragments a label attributes to itself. 
+Now, all we needed to determine is which labels gets a fragment if several labels claimed it.  
+We used a naive method - the closest label of all the labels who claimed the fragment receives it. 
+Hence, we matched every fragment to its closest label of all the labels which claimed it. When there is a fragment that isn't claimed by anyone we attributed it to its closest label of all the labels.
+
 ### Results
 
 In this section we will present several results: These results are also avaliable in [results](/results) directory.
@@ -28,27 +36,27 @@ In this section we will present several results: These results are also avaliabl
 #### Giraffes
 Amount of Fragments: 900, Patch Size: 9, Grabcut Threshold: 0.0001, Grabcut Iterations: 10, SLIC Sigma: 5
 
-<img src="/results/result5.tif" width="600" align="middle">  
+<img src="results/result5.tif" width="200" align="middle">  
 
 #### Dog
 Amount of Fragments: 700, Patch Size: 9, Grabcut Threshold: 0.0001, Grabcut Iterations: 10, SLIC Sigma: 5
 
-<img src="/results/result4.tif" width="600" align="middle">  
+<img src="results/result4.tif" width="200" align="middle">  
 
 #### Texture
 Amount of Fragments: 700, Patch Size: 9, Grabcut Threshold: 0.0001, Grabcut Iterations: 10, SLIC Sigma: 5
 
-<img src="/results/result1.tif" width="600" align="middle">  
+<img src="results/result1.tif" width="200" align="middle">  
 
 #### Girl
 Amount of Fragments: 400, Patch Size: 9, Grabcut Threshold: 0.001, Grabcut Iterations: 7, SLIC Sigma: 5
 
-<img src="/results/result2.tif" width="600" align="middle">  
+<img src="results/result2.tif" width="200" align="middle">  
 
 #### Vegtables
 Amount of Fragments: 900, Patch Size: 9, Grabcut Threshold: 0.001, Grabcut Iterations: 5, SLIC Sigma: 5
 
-<img src="/results/result3.tif" width="600" align="middle">  
+<img src="results/result3.tif" width="200" align="middle">  
 
 ***NOTE:*** Our algorithm is not perfect and has its own outliers yet some of them are caused by the resolution of the segmentation.
 

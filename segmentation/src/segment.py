@@ -220,6 +220,7 @@ def segment_image(**kwargs):
         mask = compute_mask(fragments, distance[:, label_key], grabcut_thresh, maybe_threshold)
         temp_mask = mask.copy()
         unique_fg_bg_vals = np.unique(mask)
+        # make sure there are both foregrounds and backgrounds as requiered by grabcut
         if np.logical_and(np.logical_or(cv2.GC_FGD in unique_fg_bg_vals, cv2.GC_PR_FGD in unique_fg_bg_vals), \
                           np.logical_or(cv2.GC_BGD in unique_fg_bg_vals, cv2.GC_PR_BGD in unique_fg_bg_vals)):
             bgd_model = np.zeros((1, 65), np.float64)
