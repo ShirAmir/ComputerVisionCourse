@@ -4,7 +4,7 @@ The course's webpage can be found [here](http://cs.haifa.ac.il/hagit/courses/CV)
 
 ### Workspace
 We use **Anaconda 2.4.0** Python Distribution on **Windows 10**.
-Download `Anaconda3-2.4.0-Windows-x86_64.zip` from [this link](https://repo.continuum.io/archive/.winzip/ "zipped Windows installers"), unzip and install.  
+Just download `Anaconda3-2.4.0-Windows-x86_64.zip` from [this link](https://repo.continuum.io/archive/.winzip/ "zipped Windows installers"), unzip and install.  
 Also, we use **Python 3.5.3** with the following primary modules:
   * Numpy 1.12.1
   * Opencv 3.1.0
@@ -27,5 +27,5 @@ OpenCV is installed by typing `conda install -c menpo opencv3=3.1.0` in the cond
   
 ### Assignments
 This course requires 5 assignments:
-  1. Segmentation
-
+  1. [Segmentation](/segmentation/guide.md)
+  2. [Facial Recognition](/facialRecognition/guide.md)
