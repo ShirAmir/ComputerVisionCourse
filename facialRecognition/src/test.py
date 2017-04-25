@@ -7,13 +7,13 @@
 import numpy as np
 import cv2
 
-path1 = "utility\\haarcascade_frontalface_default.xml"
-path2 = "utility\\haarcascade_eye.xml"
+path1 = "utility/haarcascade_frontalface_default.xml"
+path2 = "utility/haarcascade_eye.xml"
 
 face_cascade = cv2.CascadeClassifier(path1)
 eye_cascade = cv2.CascadeClassifier(path2)
 
-img_name = 'harry_potter.jpg'
+img_name = '../images/s1/1.png'
 img = cv2.imread(img_name)
 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
@@ -28,6 +28,5 @@ for (x, y, w, h) in faces:
         cv2.rectangle(roi_color, (ex,ey), (ex+ew,ey+eh), (0, 255, 0), 2)
 
 cv2.imshow('face decetion', img)
-cv2.imwrite('%s_res.jpg' % (img_name), img)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
