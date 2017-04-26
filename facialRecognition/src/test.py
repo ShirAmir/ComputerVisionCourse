@@ -6,6 +6,7 @@
 
 import numpy as np
 import cv2
+import eigenfaces as ef
 
 path1 = "utility/haarcascade_frontalface_default.xml"
 path2 = "utility/haarcascade_eye.xml"

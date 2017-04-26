@@ -25,12 +25,11 @@ def create_eigenfaces(faces_db, amount=10):
     average_face = np.mean(faces_db, axis=0)
     average_mat = np.matlib.repmat(average_face.reshape(IMG_LENGTH, 1), 1, img_num)
     t_mat = t_mat - average_mat
-    u, s, v = np.linalg.svd(t_mat, full_matrices=False)
-    eigenvecs = u / img_num
+    mean, eigenvecs = cv2.PCACompute(t_mat.T, np.array([]), maxComponents=300)
 
-    for i in range(np.shape(u)[1] - 1):
+    for i in range(np.shape(eigenvecs)[0] - 1):
         fig = plt.figure()
         ax = fig.add_subplot(1, 1, 1)
-        cax = ax.imshow(eigenvecs[:,i].reshape(SIZE_X,SIZE_Y), cmap='gray')
+        cax = ax.imshow(eigenvecs[i,:].reshape(SIZE_X,SIZE_Y), cmap='gray')
         ax.set_title("EigenFace")
         plt.show()

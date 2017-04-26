@@ -27,7 +27,7 @@ def add_training_set(dir_path):
         # detect the face in the image as aligning
         for (x, y, w, h) in detected_face:
             roi_gray = gray[y:y+h, x:x+w]
-            resized_img = cv2.resize(roi_gray, (ef.SIZE_X, ef.SIZE_Y), interpolation=cv2.INTER_AREA)
+            resized_img = cv2.resize(roi_gray, (ef.SIZE_X, ef.SIZE_Y), interpolation=cv2.INTER_LINEAR)
             # add the aligned image and a column in faces_db
             faces_db.append(resized_img)
         cv2.imshow('face decetion', img)
