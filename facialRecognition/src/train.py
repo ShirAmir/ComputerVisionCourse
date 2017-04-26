@@ -7,7 +7,6 @@
 import numpy as np
 import cv2
 import os
-import pandas as pd
 import eigenfaces as ef
 
 def add_training_set(dir_path):
@@ -33,11 +32,8 @@ def add_training_set(dir_path):
         cv2.imshow('face decetion', img)
 
     #detect eigenfaces
-    ef.create_eigenfaces(faces_db)
-
-    raw_data = {'eigenvals': [18, 17], 'eigenvecs': [[2, 3, 5, 43], [5, 7, 39,]]}
-    df = pd.DataFrame(raw_data, columns=['eigenvals', 'eigenvecs'])
-    df.to_csv('../image_data/%s.csv' % name)
+    eigenvecs = ef.create_eigenfaces(faces_db)
+    np.savetxt('../image_data/%s.csv' % name, np.asarray(eigenvecs), delimiter=",")
 
 if __name__ == "__main__":
 

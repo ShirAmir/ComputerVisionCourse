@@ -33,3 +33,4 @@ def create_eigenfaces(faces_db, amount=10):
         cax = ax.imshow(eigenvecs[i,:].reshape(SIZE_X,SIZE_Y), cmap='gray')
         ax.set_title("EigenFace")
         plt.show()
+    return eigenvecs
