@@ -10,12 +10,6 @@ import os
 import pandas as pd
 import eigenfaces as ef
 
-# constants
-SIZE_X = 256
-SIZE_Y = 256
-FACE_PATH = "utility\\haarcascade_frontalface_default.xml"
-FACE_CASCADE = cv2.CascadeClassifier(FACE_PATH)
-
 def add_training_set(dir_path):
     """ add another face to the database
     :param dir_path: path to the directory that contains set of images.
@@ -29,11 +23,11 @@ def add_training_set(dir_path):
     for f in file_list:
         img = cv2.imread('%s/%s' % (dir_path, f))
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        detected_face = FACE_CASCADE.detectMultiScale(gray, 1.3, 5)
+        detected_face = ef.FACE_CASCADE.detectMultiScale(gray, 1.3, 5)
         # detect the face in the image as aligning
         for (x, y, w, h) in detected_face:
             roi_gray = gray[y:y+h, x:x+w]
-            resized_img = cv2.resize(roi_gray, (SIZE_X, SIZE_Y), interpolation=cv2.INTER_AREA)
+            resized_img = cv2.resize(roi_gray, (ef.SIZE_X, ef.SIZE_Y), interpolation=cv2.INTER_AREA)
             # add the aligned image and a column in faces_db
             faces_db.append(resized_img)
         cv2.imshow('face decetion', img)
