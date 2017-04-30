@@ -7,27 +7,29 @@
 import numpy as np
 import cv2
 import eigenfaces as ef
-
-path1 = "utility/haarcascade_frontalface_default.xml"
-path2 = "utility/haarcascade_eye.xml"
-
-face_cascade = cv2.CascadeClassifier(path1)
-eye_cascade = cv2.CascadeClassifier(path2)
+import os
 
 img_name = '../images/s1/1.png'
 img = cv2.imread(img_name)
 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
-faces = face_cascade.detectMultiScale(gray, 1.3, 5)
+faces = ef.FACE_CASCADE.detectMultiScale(gray, 1.3, 5)
+eigen_files = os.listdir('../eigenfaces')
 
 for (x, y, w, h) in faces:
     cv2.rectangle(img, (x, y), (x+w, y+h), (255, 0, 0), 2)
     roi_gray = gray[y:y+h, x:x+w]
+    resized_img = cv2.resize(roi_gray, (ef.SIZE_X, ef.SIZE_Y), interpolation=cv2.INTER_LINEAR)
     roi_color = img[y:y+h, x:x+w]
-    eyes = eye_cascade.detectMultiScale(roi_gray)
+    eyes = ef.EYE_CASCADE.detectMultiScale(roi_gray)
+
     for (ex, ey, ew, eh) in eyes:
         cv2.rectangle(roi_color, (ex,ey), (ex+ew,ey+eh), (0, 255, 0), 2)
+    for f in eigen_files:
+        eigenvecs = np.genfromtxt('../eigenfaces/%s' % f, delimiter=',')
+        mean = eigenvecs[0]
+        print(np.shape(eigenvecs))
+        eigenvecs = np.delete(eigenvecs, 0, 0)
+        print(np.shape(eigenvecs))
+        print(np.shape(resized_img.reshape(1, ef.IMG_LENGTH)))
+        img_reconstruction = cv2.PCAProject(resized_img.reshape(1, ef.IMG_LENGTH), mean, eigenvecs)
 
-cv2.imshow('face decetion', img)
-cv2.waitKey(0)
-cv2.destroyAllWindows()

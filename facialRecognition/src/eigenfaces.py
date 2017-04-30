@@ -12,9 +12,15 @@ import matplotlib.pyplot as plt
 # constants
 SIZE_X = 256
 SIZE_Y = 256
+
 FACE_PATH = "utility\\haarcascade_frontalface_default.xml"
+EYES_PATH = "utility/haarcascade_eye.xml"
+
 FACE_CASCADE = cv2.CascadeClassifier(FACE_PATH)
+EYE_CASCADE = cv2.CascadeClassifier(EYES_PATH)
+
 IMG_LENGTH = SIZE_X * SIZE_Y
+
 def create_eigenfaces(faces_db, amount=10):
     """ calculates eigenvectors and eigenvalus
     :param faces_db: a matrix in wich each column is an image vector
@@ -25,7 +31,7 @@ def create_eigenfaces(faces_db, amount=10):
     average_face = np.mean(faces_db, axis=0)
     average_mat = np.matlib.repmat(average_face.reshape(IMG_LENGTH, 1), 1, img_num)
     t_mat = t_mat - average_mat
-    mean, eigenvecs = cv2.PCACompute(t_mat.T, np.array([]), maxComponents=300)
+    mean, eigenvecs = cv2.PCACompute(t_mat.T, np.array([]))
 
     for i in range(np.shape(eigenvecs)[0] - 1):
         fig = plt.figure()
@@ -33,4 +39,4 @@ def create_eigenfaces(faces_db, amount=10):
         cax = ax.imshow(eigenvecs[i,:].reshape(SIZE_X,SIZE_Y), cmap='gray')
         ax.set_title("EigenFace")
         plt.show()
-    return eigenvecs
+    return np.vstack((mean, eigenvecs))
