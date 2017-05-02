@@ -34,10 +34,15 @@ def add_training_set(dir_path):
     # delete dummy row from matrix
     faces_mat = np.delete(faces_mat, 0, 0)
 
-    #detect eigenfaces and save them in a cvs file
     if len(faces_mat) != 0:
+        # detect eigenfaces and save them in a cvs file
         eigenvecs = ef.create_eigenfaces(faces_mat)
         np.savetxt('../eigenfaces/%s.csv' % name, np.asarray(eigenvecs), delimiter=",")
+        # acquire parameters for computing distance from new image
+        mean = eigenvecs[0].reshape(1, ef.IMG_LENGTH)
+        eigenvecs = np.delete(eigenvecs, 0, 0)
+        mean_projection, inv_cov_mat = ef.get_mahalanobis_params(faces_mat, mean, eigenvecs)
+
 
 if __name__ == "__main__":
 

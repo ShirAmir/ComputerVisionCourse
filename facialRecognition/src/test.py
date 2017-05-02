@@ -37,4 +37,4 @@ for f in eigen_files:
     mean = eigenvecs[0]
     mean = mean.reshape((1,ef.IMG_LENGTH))
     eigenvecs = np.delete(eigenvecs, 0, 0)
-    img_reconstruction = cv2.PCAProject(faces_mat, mean, eigenvecs)
+    img_projection = cv2.PCAProject(faces_mat, mean, eigenvecs)

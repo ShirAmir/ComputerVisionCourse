@@ -21,14 +21,14 @@ EYE_CASCADE = cv2.CascadeClassifier(EYES_PATH)
 
 IMG_LENGTH = SIZE_X * SIZE_Y
 
-def create_eigenfaces(faces_db, amount=10):
-    """ calculates eigenvectors and eigenvalus
-    :param faces_db: a matrix in wich each column is an image vector
+def create_eigenfaces(faces_mat, amount=10):
+    """ calculates eigenvectors
+    :param faces_mat: a matrix in wich each row is an image vector
     """
-    img_num = len(faces_db)
+    img_num = len(faces_mat)
     # t contains each img as a column in it
-    t_mat = faces_db.copy()
-    average_face = np.mean(faces_db, axis=0)
+    t_mat = faces_mat.copy()
+    average_face = np.mean(faces_mat, axis=0)
     average_mat = np.matlib.repmat(average_face, img_num, 1)
     t_mat = t_mat - average_mat
     mean, eigenvecs = cv2.PCACompute(t_mat, np.array([]))
@@ -40,3 +40,17 @@ def create_eigenfaces(faces_db, amount=10):
         ax.set_title("EigenFace")
         plt.show()
     return np.vstack((mean, eigenvecs))
+
+def get_mahalanobis_params(faces_mat, mean, eigenvecs):
+    """ compute the mean projection of each person on the eigenvectors
+    :param faces_mat: a matrix in which each row is an image vector
+    :param mean: the mean image vector
+    :param eigenvecs: a matrix in which each row is an eigenvector
+    """
+    # project all images in faces_mat on eigenvectors
+    img_projection = cv2.PCAProject(faces_mat, mean, eigenvecs)
+    mean_projection = np.mean(img_projection, axis=0)
+    cov_mat = np.cov(img_projection)
+    inv_cov_mat = np.linalg.inv(cov_mat)
+    return mean_projection, inv_cov_mat
+
