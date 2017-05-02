@@ -22,12 +22,15 @@ for (x, y, w, h) in faces:
     cv2.rectangle(img, (x, y), (x+w, y+h), (255, 0, 0), 2)
     roi_gray = gray[y:y+h, x:x+w]
     resized_img = cv2.resize(roi_gray, (ef.SIZE_X, ef.SIZE_Y), interpolation=cv2.INTER_LINEAR)
-    np.vstack((faces_mat, resized_img.reshape(1, ef.IMG_LENGTH)))
+    faces_mat = np.vstack((faces_mat, resized_img.reshape(1, ef.IMG_LENGTH)))
     roi_color = img[y:y+h, x:x+w]
     eyes = ef.EYE_CASCADE.detectMultiScale(roi_gray)
 
     for (ex, ey, ew, eh) in eyes:
         cv2.rectangle(roi_color, (ex, ey), (ex+ew, ey+eh), (0, 255, 0), 2)
+
+# delete dummy row from matrix
+faces_mat = np.delete(faces_mat, 0, 0)
 
 for f in eigen_files:
     eigenvecs = np.genfromtxt('../eigenfaces/%s' % f, delimiter=',')

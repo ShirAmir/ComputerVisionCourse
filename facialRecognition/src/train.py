@@ -16,7 +16,9 @@ def add_training_set(dir_path):
     """
     name = dir_path.split('/')[-1]
     file_list = os.listdir(dir_path)
-    faces_db = []
+
+    faces_mat = np.zeros((1, ef.IMG_LENGTH))
+
     # for each image of the subject
     for f in file_list:
         img = cv2.imread('%s/%s' % (dir_path, f))
@@ -26,13 +28,15 @@ def add_training_set(dir_path):
         for (x, y, w, h) in detected_face:
             roi_gray = gray[y:y+h, x:x+w]
             resized_img = cv2.resize(roi_gray, (ef.SIZE_X, ef.SIZE_Y), interpolation=cv2.INTER_LINEAR)
-            # add the aligned image as a column in faces_db
-            faces_db.append(resized_img)
-        cv2.imshow('face decetion', img)
+            faces_mat = np.vstack((faces_mat, resized_img.reshape(1, ef.IMG_LENGTH)))
+        cv2.imshow('face detection', img)
+
+    # delete dummy row from matrix
+    faces_mat = np.delete(faces_mat, 0, 0)
 
     #detect eigenfaces and save them in a cvs file
-    if len(faces_db) != 0:
-        eigenvecs = ef.create_eigenfaces(faces_db)
+    if len(faces_mat) != 0:
+        eigenvecs = ef.create_eigenfaces(faces_mat)
         np.savetxt('../eigenfaces/%s.csv' % name, np.asarray(eigenvecs), delimiter=",")
 
 if __name__ == "__main__":

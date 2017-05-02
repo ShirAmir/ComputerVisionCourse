@@ -27,11 +27,11 @@ def create_eigenfaces(faces_db, amount=10):
     """
     img_num = len(faces_db)
     # t contains each img as a column in it
-    t_mat = np.asarray(faces_db).flatten().reshape(img_num, IMG_LENGTH).T
+    t_mat = faces_db.copy()
     average_face = np.mean(faces_db, axis=0)
-    average_mat = np.matlib.repmat(average_face.reshape(IMG_LENGTH, 1), 1, img_num)
+    average_mat = np.matlib.repmat(average_face, img_num, 1)
     t_mat = t_mat - average_mat
-    mean, eigenvecs = cv2.PCACompute(t_mat.T, np.array([]))
+    mean, eigenvecs = cv2.PCACompute(t_mat, np.array([]))
 
     for i in range(np.shape(eigenvecs)[0] - 1):
         fig = plt.figure()
