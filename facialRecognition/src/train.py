@@ -41,8 +41,8 @@ def add_training_set(dir_path):
         # acquire parameters for computing distance from new image
         mean = eigenvecs[0].reshape(1, ef.IMG_LENGTH)
         eigenvecs = np.delete(eigenvecs, 0, 0)
-        mean_projection, inv_cov_mat = ef.get_mahalanobis_params(faces_mat, mean, eigenvecs)
-
+        params = ef.get_mahalanobis_params(faces_mat, mean, eigenvecs)
+        np.savetxt('../mahalanobis/%s.csv' % name, np.asarray(params), delimiter=",")
 
 if __name__ == "__main__":
 
@@ -50,6 +50,6 @@ if __name__ == "__main__":
     db_path = '../images'
     dir_list = os.listdir(db_path)
     # truncate list - only for developement
-    dir_list = dir_list[0:1]
+    #dir_list = dir_list[0:1]
     for d in dir_list:
         add_training_set('%s/%s' % (db_path, d))

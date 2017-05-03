@@ -14,7 +14,8 @@ img = cv2.imread(img_name)
 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 faces = ef.FACE_CASCADE.detectMultiScale(gray, 1.3, 5)
 eigen_files = os.listdir('../eigenfaces')
-eigen_files = eigen_files[0:1]
+# truncate eigenfiles - only for development means
+#eigen_files = eigen_files[0:1]
 
 faces_mat = np.zeros((1, ef.IMG_LENGTH))
 
@@ -32,9 +33,29 @@ for (x, y, w, h) in faces:
 # delete dummy row from matrix
 faces_mat = np.delete(faces_mat, 0, 0)
 
+dist_mat = np.zeros((1, len(faces_mat)))
+
 for f in eigen_files:
+    # load eigenvectors
     eigenvecs = np.genfromtxt('../eigenfaces/%s' % f, delimiter=',')
     mean = eigenvecs[0]
     mean = mean.reshape((1,ef.IMG_LENGTH))
     eigenvecs = np.delete(eigenvecs, 0, 0)
-    img_projection = cv2.PCAProject(faces_mat, mean, eigenvecs)
+    # load mahalanobis parameters
+    params = np.genfromtxt('../mahalanobis/%s' % f, delimiter=',')
+    mean_proj = params[0]
+    inv_cov_mat = np.delete(params, 0, 0)
+    # acquire projections of identified faces on eigenvectors
+    img_proj = cv2.PCAProject(faces_mat, mean, eigenvecs)
+    # calculate mahalanobis distance of current faces from current db face
+    mean_proj_mat = np.matlib.repmat(mean_proj, np.shape(img_proj)[0], 1)
+    temp = img_proj - mean_proj_mat
+    res = np.dot(np.dot(temp, inv_cov_mat), temp.T)
+    res = np.diag(res)
+    res = np.sqrt(res)
+    dist_mat = np.vstack((dist_mat, res))
+
+# delete dummy row from matrix
+dist_mat = np.delete(dist_mat, 0, 0)
+
+face_matches = np.argmin(dist_mat, axis=0)

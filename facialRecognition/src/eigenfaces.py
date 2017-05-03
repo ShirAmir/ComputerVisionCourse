@@ -48,9 +48,8 @@ def get_mahalanobis_params(faces_mat, mean, eigenvecs):
     :param eigenvecs: a matrix in which each row is an eigenvector
     """
     # project all images in faces_mat on eigenvectors
-    img_projection = cv2.PCAProject(faces_mat, mean, eigenvecs)
-    mean_projection = np.mean(img_projection, axis=0)
-    cov_mat = np.cov(img_projection)
+    img_proj = cv2.PCAProject(faces_mat, mean, eigenvecs)
+    mean_proj = np.mean(img_proj, axis=0)
+    cov_mat = np.cov(img_proj)
     inv_cov_mat = np.linalg.inv(cov_mat)
-    return mean_projection, inv_cov_mat
-
+    return np.vstack((mean_proj, inv_cov_mat))
