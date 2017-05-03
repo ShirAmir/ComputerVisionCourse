@@ -1,0 +1,105 @@
+# *************************************************
+# *** Semantic Segmentation from Training Image ***
+# ************ Merav Joseph 200652063 *************
+# ************* Shir Amir 209712801 ***************
+# *************************************************
+
+import PIL.Image
+import PIL.ImageTk
+from tkinter import *
+from tkinter.filedialog import askopenfilename
+from tkinter.filedialog import askdirectory
+import cv2
+
+def train():
+    """ callback function """
+
+def test():
+    """ callback function """
+
+def add_training_set():
+    """ callback function """
+    new_training_set_path.set(askdirectory())
+
+def set_image_path():
+    """ callback function """
+    test_img_path.set(askopenfilename())
+
+def set_output_dir():
+    """ callback function """
+    output_dir.set(askdirectory())
+
+def compute():
+    """ callback function """
+    # Prepare parameters
+    kwargs = {}
+    kwargs['TRAIN_IMG_PATH'] = train_img_path.get()
+    kwargs['LABELS_IMG_PATH'] = labels_img_path.get()
+    kwargs['TEST_IMG_PATH'] = test_img_path.get()
+    kwargs['OUTPUT_DIR'] = output_dir.get()
+    kwargs['FRAG_AMOUNT'] = frag_amount.get()
+    kwargs['PATCH_SIZE'] = patch_size.get()
+    kwargs['GRABCUT_THRESH'] = grabcut_thresh.get()
+    kwargs['GRABCUT_ITER'] = grabcut_iter.get()
+    kwargs['SLIC_SIGMA'] = slic_sigma.get()
+
+    # Compute segmentation
+    res_path = segment.segment_image(**kwargs)
+    res = PIL.Image.open(res_path)
+    res = PIL.ImageTk.PhotoImage(res)
+    # image = Label(canvas, image=res, anchor=CENTER)
+    image.configure(image=res)
+    image.image = res
+    image.grid(row=2, column=2, columnspan=3, rowspan=12)
+
+root = Tk()
+root.title("Facial Recognition")
+root.configure(background='#ccffcc')
+w, h = root.winfo_screenwidth(), root.winfo_screenheight()
+root.geometry("%dx%d+0+0" % (w, h))
+
+root.focus_set() # move focus to this widget
+root.bind("<Escape>", lambda e: e.widget.quit())
+
+# Define all the variables
+new_training_set_path = StringVar()
+test_img_path = StringVar()
+output_dir = StringVar()
+class_thresh = StringVar()
+
+# Header
+headline = Label(root, font="Gisha 20 bold", bg='#ccffcc', fg='#006600', text="Facial Recognition App", anchor=CENTER)
+headline.grid(row=0, column=0, columnspan=7, padx=10, pady=10)
+
+# Left input and output settings
+btn1 = Button(root, font="Gisha 12", fg='#006600', bg='#b3ffb3', command=train, text="Train", width=12)
+btn1.grid(row=1, column=0, padx=15, pady=0)
+btn2 = Button(root, font="Gisha 12", fg='#006600', bg='#b3ffb3', command=test, text="Test", width=12)
+btn2.grid(row=2, column=0, padx=15, pady=0)
+btn3 = Button(root, font="Gisha 12", fg='#006600', bg='#b3ffb3', command=add_training_set, text="Add Training \n Set", width=12)
+btn3.grid(row=2, column=0, padx=15, pady=0)
+new_training_set_path.set("../images/giraffes_train_labels.tif")
+btn4 = Button(root, font="Gisha 12", fg='#006600', bg='#b3ffb3', command=set_image_path, text="Set Image \n Path", width=12)
+btn4.grid(row=3, column=0, padx=15, pady=0)
+test_img_path.set("../images/giraffes_test.jpg")
+btn5 = Button(root, font="Gisha 12", fg='#006600', bg='#b3ffb3', command=set_output_dir, text="Set Output \n Directory", width=12)
+btn5.grid(row=4, column=0, padx=15, pady=0)
+output_dir.set("../results/")
+
+# Main frame for showing results
+canvas = Canvas(relief=RIDGE, bd=5, width=0.75*w, height=0.75*h).grid(row=1, column=1, columnspan=5, rowspan=22, sticky=E)
+image = Label(canvas, image="", anchor=CENTER)
+
+# Right parameter settings
+label1 = Label(root, font="Gisha 12", fg='#006600', bg='#ccffcc', text="Classification \n Threshold:", width=15)
+label1.grid(row=1, column=6, padx=0, pady=0)
+entry1 = Entry(root, font="Gisha 12", fg='#006600', textvariable=class_thresh, width=12)
+entry1.grid(row=2, column=6, padx=15, pady=0)
+class_thresh.set("1")
+
+# Footer inside images frame
+explanations = "Press Esc to leave \n Press GO! once and be patient :)"
+footer = Label(root, font="Gisha 14", fg='#006600', bg='#ccffcc', text=explanations, anchor=CENTER)
+footer.grid(row=20, column=0, columnspan=7, padx=10, pady=10)
+
+root.mainloop()
