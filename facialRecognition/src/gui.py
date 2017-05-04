@@ -19,11 +19,19 @@ def do_train():
 
 def do_test():
     """ callback function """
-    test.run_testing(test_img_path.get())
+    res_path = test.run_testing(test_img_path.get(), output_dir.get())
+    """res = PIL.Image.open(res_path)
+    res = PIL.ImageTk.PhotoImage(res)
+    # image = Label(canvas, image=res, anchor=CENTER)
+    image.configure(image=res)
+    image.image = res
+    image.grid(row=2, column=2, columnspan=3, rowspan=12)
+    """
 
 def add_training_set():
     """ callback function """
     new_training_set_path.set(askdirectory())
+    train.add_training_set(new_training_set_path.get())
 
 def set_image_path():
     """ callback function """
@@ -32,29 +40,6 @@ def set_image_path():
 def set_output_dir():
     """ callback function """
     output_dir.set(askdirectory())
-
-def compute():
-    """ callback function """
-    # Prepare parameters
-    kwargs = {}
-    kwargs['TRAIN_IMG_PATH'] = train_img_path.get()
-    kwargs['LABELS_IMG_PATH'] = labels_img_path.get()
-    kwargs['TEST_IMG_PATH'] = test_img_path.get()
-    kwargs['OUTPUT_DIR'] = output_dir.get()
-    kwargs['FRAG_AMOUNT'] = frag_amount.get()
-    kwargs['PATCH_SIZE'] = patch_size.get()
-    kwargs['GRABCUT_THRESH'] = grabcut_thresh.get()
-    kwargs['GRABCUT_ITER'] = grabcut_iter.get()
-    kwargs['SLIC_SIGMA'] = slic_sigma.get()
-
-    # Compute segmentation
-    res_path = segment.segment_image(**kwargs)
-    res = PIL.Image.open(res_path)
-    res = PIL.ImageTk.PhotoImage(res)
-    # image = Label(canvas, image=res, anchor=CENTER)
-    image.configure(image=res)
-    image.image = res
-    image.grid(row=2, column=2, columnspan=3, rowspan=12)
 
 root = Tk()
 root.title("Facial Recognition")
@@ -102,7 +87,7 @@ entry1.grid(row=2, column=6, padx=15, pady=0)
 class_thresh.set("1")
 
 # Footer inside images frame
-explanations = "Press Esc to leave \n Press GO! once and be patient :)"
+explanations = "Press each button once and be patient :) \n press Esc to leave"
 footer = Label(root, font="Gisha 14", fg='#006600', bg='#ccffcc', text=explanations, anchor=CENTER)
 footer.grid(row=20, column=0, columnspan=7, padx=10, pady=10)
 

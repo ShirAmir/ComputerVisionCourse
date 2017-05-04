@@ -7,6 +7,7 @@
 import numpy as np
 import cv2
 import pandas as pd
+import os
 import matplotlib.pyplot as plt
 import eigenfaces as ef
 
@@ -57,6 +58,7 @@ def test_folder(folder, eigenfaces, mean_vecs, labels, cov_mat, thresh=10.0):
 def analyze_results(labels, labels_pred, score, in_db):
     df = pd.DataFrame(np.vstack((labels, labels_pred, score, in_db)).T,
                       columns=('gt', 'pred', 'score', 'in_db'))
+
     # Check if prediction is correct
     df['in_db'] = df['in_db'].astype(bool)
     df['correct'] = df['gt'] == df['pred']
@@ -93,9 +95,10 @@ def analyze_results(labels, labels_pred, score, in_db):
 
     df.to_csv("result.csv")
 
-def run_testing(img_path):
+def run_testing(img_path, output_dir):
     """ Recognizes people from the database in the image.
     :param img_path: path to the tested image
+    :param output_dir: path to the output directory
     """
 
     # Load the trained data
@@ -110,14 +113,26 @@ def run_testing(img_path):
     img = cv2.imread(img_path)
     i = 0
     for (x,y,w,h) in faces_coor:
-        cv2.rectangle(img, (x,y), (x+w, y+h), (255, 0, 0), 2)
-        cv2.putText(img, label_list[i], (x, y+h+20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255,0,0), 2)
+        if label_list[i] == 'unknown':
+            color = (0, 0, 255)
+        else:
+            color = (255, 0, 0)
+        cv2.rectangle(img, (x,y), (x+w, y+h), color, 2)
+        cv2.putText(img, label_list[i], (x, y+h+20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
         i = i+1
+
+    # Find a file name that isn't taken
+    i = 1
+    while os.path.isfile('%s%s%d%s' % (output_dir, 'result', i, '.tif')):
+        i = i + 1
+
+    # Save the result
+    res_path = '%s%s%d%s' % (output_dir, 'result', i, '.tif')
+    cv2.imwrite(res_path, img)
 
     cv2.imshow('img',img)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
-
 
     """
     labels_p, labels_pred_p, score_p = test_folder("../images/positive_test_images",
@@ -131,6 +146,7 @@ def run_testing(img_path):
     analyze_results(labels, labels_pred, score, in_db)
     print("")
     """
+    return res_path
 
 if __name__ == "__main__":
     run_testing()
