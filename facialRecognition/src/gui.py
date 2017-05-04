@@ -10,12 +10,16 @@ from tkinter import *
 from tkinter.filedialog import askopenfilename
 from tkinter.filedialog import askdirectory
 import cv2
+import train
+import test
 
-def train():
+def do_train():
     """ callback function """
+    train.run_training()
 
-def test():
+def do_test():
     """ callback function """
+    test.run_testing(test_img_path.get())
 
 def add_training_set():
     """ callback function """
@@ -72,18 +76,18 @@ headline = Label(root, font="Gisha 20 bold", bg='#ccffcc', fg='#006600', text="F
 headline.grid(row=0, column=0, columnspan=7, padx=10, pady=10)
 
 # Left input and output settings
-btn1 = Button(root, font="Gisha 12", fg='#006600', bg='#b3ffb3', command=train, text="Train", width=12)
+btn1 = Button(root, font="Gisha 12", fg='#006600', bg='#b3ffb3', command=do_train, text="Train", width=12)
 btn1.grid(row=1, column=0, padx=15, pady=0)
-btn2 = Button(root, font="Gisha 12", fg='#006600', bg='#b3ffb3', command=test, text="Test", width=12)
+btn2 = Button(root, font="Gisha 12", fg='#006600', bg='#b3ffb3', command=do_test, text="Test", width=12)
 btn2.grid(row=2, column=0, padx=15, pady=0)
 btn3 = Button(root, font="Gisha 12", fg='#006600', bg='#b3ffb3', command=add_training_set, text="Add Training \n Set", width=12)
-btn3.grid(row=2, column=0, padx=15, pady=0)
+btn3.grid(row=3, column=0, padx=15, pady=0)
 new_training_set_path.set("../images/giraffes_train_labels.tif")
-btn4 = Button(root, font="Gisha 12", fg='#006600', bg='#b3ffb3', command=set_image_path, text="Set Image \n Path", width=12)
-btn4.grid(row=3, column=0, padx=15, pady=0)
-test_img_path.set("../images/giraffes_test.jpg")
+btn4 = Button(root, font="Gisha 12", fg='#006600', bg='#b3ffb3', command=set_image_path, text="Set Tested \n Image Path", width=12)
+btn4.grid(row=4, column=0, padx=15, pady=0)
+test_img_path.set("../images/trump.jpg")
 btn5 = Button(root, font="Gisha 12", fg='#006600', bg='#b3ffb3', command=set_output_dir, text="Set Output \n Directory", width=12)
-btn5.grid(row=4, column=0, padx=15, pady=0)
+btn5.grid(row=5, column=0, padx=15, pady=0)
 output_dir.set("../results/")
 
 # Main frame for showing results

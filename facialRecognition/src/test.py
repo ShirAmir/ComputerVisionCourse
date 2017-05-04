@@ -6,56 +6,131 @@
 
 import numpy as np
 import cv2
+import pandas as pd
+import matplotlib.pyplot as plt
 import eigenfaces as ef
-import os
 
-img_name = '../images/s1/1.png'
-img = cv2.imread(img_name)
-gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-faces = ef.FACE_CASCADE.detectMultiScale(gray, 1.3, 5)
-eigen_files = os.listdir('../eigenfaces')
-# truncate eigenfiles - only for development means
-#eigen_files = eigen_files[0:1]
+def load_train_data(fn="train_data.npz"):
+    """ loads the trained data.
+    :param fn: the loaded file name
+    """
 
-faces_mat = np.zeros((1, ef.IMG_LENGTH))
+    train_data = np.load(fn)
+    eigenfaces = train_data['eigenfaces']
+    mean_vecs = train_data['mean_vecs']
+    labels = train_data['labels_unique']
+    cov_mat = train_data['cov_mat']
 
-for (x, y, w, h) in faces:
-    cv2.rectangle(img, (x, y), (x+w, y+h), (255, 0, 0), 2)
-    roi_gray = gray[y:y+h, x:x+w]
-    resized_img = cv2.resize(roi_gray, (ef.SIZE_X, ef.SIZE_Y), interpolation=cv2.INTER_LINEAR)
-    faces_mat = np.vstack((faces_mat, resized_img.reshape(1, ef.IMG_LENGTH)))
-    roi_color = img[y:y+h, x:x+w]
-    eyes = ef.EYE_CASCADE.detectMultiScale(roi_gray)
+    return eigenfaces, mean_vecs, labels, cov_mat
 
-    for (ex, ey, ew, eh) in eyes:
-        cv2.rectangle(roi_color, (ex, ey), (ex+ew, ey+eh), (0, 255, 0), 2)
+def test_image(face, eigenfaces, mean_vecs, labels, cov_mat, thresh=10.0):
+    """ recognizes the facae as a person in the database
+    :param face: a scaled face image
+    :param eigenfaces: the eigenfaces
+    :param mean_vecs: the mean projection of each data set
+    :param labels: the label of each person in the database
+    :param cov_mat: the covariance matrix of each data set
+    :param thresh: threshold of maximal considered distance
+    """
 
-# delete dummy row from matrix
-faces_mat = np.delete(faces_mat, 0, 0)
+    eigenvecs = eigenfaces.reshape((-1, eigenfaces.shape[-1]))
+    mahal_dist = ef.compute_mahal_dist(face, eigenvecs, mean_vecs, cov_mat)
+    class_ind, ratio_test = ef.classify(mahal_dist)
+    min_dist = mahal_dist[class_ind]
+    if min_dist > thresh:
+        result_person = 'unknown'
+    else:
+        result_person = labels[class_ind]
+    return result_person, min_dist
 
-dist_mat = np.zeros((1, len(faces_mat)))
+def test_folder(folder, eigenfaces, mean_vecs, labels, cov_mat, thresh=10.0):
+    images, labels_test = ef.load_dataset(folder)
+    labels_pred = []
+    score = []
+    for ind, im in enumerate(images):
+        result_person, min_dist = test_image(im, eigenfaces, mean_vecs,
+                                             labels, cov_mat, thresh)
+        labels_pred.append(result_person)
+        score.append(min_dist)
+    return labels_test, labels_pred, score
 
-for f in eigen_files:
-    # load eigenvectors
-    eigenvecs = np.genfromtxt('../eigenfaces/%s' % f, delimiter=',')
-    mean = eigenvecs[0]
-    mean = mean.reshape((1,ef.IMG_LENGTH))
-    eigenvecs = np.delete(eigenvecs, 0, 0)
-    # load mahalanobis parameters
-    params = np.genfromtxt('../mahalanobis/%s' % f, delimiter=',')
-    mean_proj = params[0]
-    inv_cov_mat = np.delete(params, 0, 0)
-    # acquire projections of identified faces on eigenvectors
-    img_proj = cv2.PCAProject(faces_mat, mean, eigenvecs)
-    # calculate mahalanobis distance of current faces from current db face
-    mean_proj_mat = np.matlib.repmat(mean_proj, np.shape(img_proj)[0], 1)
-    temp = img_proj - mean_proj_mat
-    res = np.dot(np.dot(temp, inv_cov_mat), temp.T)
-    res = np.diag(res)
-    res = np.sqrt(res)
-    dist_mat = np.vstack((dist_mat, res))
+def analyze_results(labels, labels_pred, score, in_db):
+    df = pd.DataFrame(np.vstack((labels, labels_pred, score, in_db)).T,
+                      columns=('gt', 'pred', 'score', 'in_db'))
+    # Check if prediction is correct
+    df['in_db'] = df['in_db'].astype(bool)
+    df['correct'] = df['gt'] == df['pred']
+    df.loc[~df['in_db'], 'correct'] = df.loc[~df['in_db'], 'pred'].isnull()
 
-# delete dummy row from matrix
-dist_mat = np.delete(dist_mat, 0, 0)
+    # Divide to true/false samples
+    df_in_db = df[df['in_db']]
+    df_not_in_db = df[~df['in_db']]
 
-face_matches = np.argmin(dist_mat, axis=0)
+    # analyze true samples
+    num_samples = len(df)
+    num_in_db_samples = len(df_in_db)
+    num_not_in_db_samples = len(df_not_in_db)
+
+    correct_db_classification = df_in_db['correct'].sum()
+    incorrect_db_classification = num_in_db_samples - correct_db_classification
+
+    correct_not_in_db = df_not_in_db['correct'].sum()
+    incorrect_not_in_db = num_not_in_db_samples - correct_not_in_db
+
+    print("==============================================")
+    print("Total samples in DB: %d" % num_in_db_samples)
+    print("  Correctly classified: %d (%.1f%%)" %
+          (correct_db_classification, (correct_db_classification/float(num_in_db_samples))*100.0))
+    print("  Incorrectly classified: %d (%.1f%%)" %
+          (incorrect_db_classification, (incorrect_db_classification / float(num_in_db_samples)) * 100.0))
+
+    print("\nTotal samples not in DB: %d" % num_not_in_db_samples)
+    print("  Correctly classified as not in DB: %d (%.1f%%)" %
+          (correct_not_in_db, (correct_not_in_db/float(num_not_in_db_samples))*100.0))
+    print("  Incorrectly classified as person: %d (%.1f%%)" %
+          (incorrect_not_in_db, (incorrect_not_in_db/float(num_not_in_db_samples))*100.0))
+    print("==============================================")
+
+    df.to_csv("result.csv")
+
+def run_testing(img_path):
+    """ Recognizes people from the database in the image.
+    :param img_path: path to the tested image
+    """
+
+    # Load the trained data
+    eigenfaces, mean_vecs, labels, cov_mat = load_train_data()
+    img = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
+    faces, faces_coor = ef.find_faces(img)
+    label_list = []
+    for i in range(len(faces)):
+        result_person, _ = test_image(faces[i], eigenfaces, mean_vecs, labels, cov_mat, thresh=10.0)
+        label_list.append(result_person)
+    
+    img = cv2.imread(img_path)
+    i = 0
+    for (x,y,w,h) in faces_coor:
+        cv2.rectangle(img, (x,y), (x+w, y+h), (255, 0, 0), 2)
+        cv2.putText(img, label_list[i], (x, y+h+20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255,0,0), 2)
+        i = i+1
+
+    cv2.imshow('img',img)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
+
+    """
+    labels_p, labels_pred_p, score_p = test_folder("../images/positive_test_images",
+                                             eigenfaces, mean_vecs, labels, cov_mat, thresh=10.0)
+    labels_n, labels_pred_n, score_n = test_folder("../images/negative_test_images",
+                                             eigenfaces, mean_vecs, labels, cov_mat, thresh=10.0)
+    labels = labels_p + labels_n
+    labels_pred = labels_pred_p + labels_pred_n
+    score = score_p + score_n
+    in_db = [True]*len(labels_p) + [False]*len(labels_n)
+    analyze_results(labels, labels_pred, score, in_db)
+    print("")
+    """
+
+if __name__ == "__main__":
+    run_testing()

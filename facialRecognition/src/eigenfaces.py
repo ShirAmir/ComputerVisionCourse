@@ -3,53 +3,171 @@
 # ************ Merav Joseph 200652063 *************
 # ************* Shir Amir 209712801 ***************
 # *************************************************
+import os
 import numpy as np
-import numpy.matlib
-import numpy.linalg
 import cv2
 import matplotlib.pyplot as plt
 
 # constants
-SIZE_X = 256
-SIZE_Y = 256
-
-FACE_PATH = "utility\\haarcascade_frontalface_default.xml"
-EYES_PATH = "utility/haarcascade_eye.xml"
-
-FACE_CASCADE = cv2.CascadeClassifier(FACE_PATH)
-EYE_CASCADE = cv2.CascadeClassifier(EYES_PATH)
-
+SIZE_X = 128
+SIZE_Y = 128
+FACE_PATH = r"utility\haarcascade_frontalface_default.xml"
+EYE_PATH = r"utility\haarcascade_eye.xml"
+FACE_CLASSIFIER = cv2.CascadeClassifier(FACE_PATH)
+EYE_CLASSIFIER = cv2.CascadeClassifier(EYE_PATH)
 IMG_LENGTH = SIZE_X * SIZE_Y
 
-def create_eigenfaces(faces_mat, amount=10):
-    """ calculates eigenvectors
-    :param faces_mat: a matrix in wich each row is an image vector
+def find_faces(img, debug=False):
+    """ Returns resized faces ROI. If no face detected, returns empty list.
+    :param img: the image to face - detected. 
+    :param debug: show extra data in debugging mode.
+    :return: list of detectd faces after resize to SIZE_X x SIZE_Y
     """
-    img_num = len(faces_mat)
-    # t contains each img as a column in it
-    t_mat = faces_mat.copy()
-    average_face = np.mean(faces_mat, axis=0)
-    average_mat = np.matlib.repmat(average_face, img_num, 1)
-    t_mat = t_mat - average_mat
-    mean, eigenvecs = cv2.PCACompute(t_mat, np.array([]))
 
-    for i in range(np.shape(eigenvecs)[0] - 1):
-        fig = plt.figure()
-        ax = fig.add_subplot(1, 1, 1)
-        cax = ax.imshow(eigenvecs[i,:].reshape(SIZE_X,SIZE_Y), cmap='gray')
-        ax.set_title("EigenFace")
-        plt.show()
-    return np.vstack((mean, eigenvecs))
+    assert img.ndim == 2, "Image must be 2 dimensional."
+    assert img.dtype == np.uint8, "Image must be of type uint8."
 
-def get_mahalanobis_params(faces_mat, mean, eigenvecs):
-    """ compute the mean projection of each person on the eigenvectors
-    :param faces_mat: a matrix in which each row is an image vector
-    :param mean: the mean image vector
-    :param eigenvecs: a matrix in which each row is an eigenvector
+    # detect faces in image
+    detected_faces = FACE_CLASSIFIER.detectMultiScale(img, 1.3, 5)
+    faces = []
+    faces_coor = []
+
+    # align by resizing all faces to same size
+    for (x, y, w, h) in detected_faces:
+        cv2.rectangle(img,(x,y),(x+w,y+h),(255,0,0),2)
+        roi = img[y:y + h, x:x + w]
+        eyes = EYE_CLASSIFIER.detectMultiScale(roi)
+        resized_roi = cv2.resize(roi, (SIZE_X, SIZE_Y), interpolation=cv2.INTER_LINEAR)
+        faces.append(resized_roi)
+        faces_coor.append((x,y,w,h))
+
+    if debug:
+        img_debug = img.copy()
+        img_debug = cv2.cvtColor(img_debug, cv2.COLOR_GRAY2RGB)
+        for (x, y, w, h) in detected_faces:
+            cv2.rectangle(img_debug, (x, y), (x + w, y + h), (255, 0, 0), 2)
+            for (ex, ey, ew, eh) in eyes:
+                cv2.rectangle(img_debug, (ex+x, ey+y), (ex + x + ew, ey + y + eh), (0, 255, 0), 2)
+        cv2.imshow("face_detection", img_debug)
+        cv2.waitKey()
+
+    return faces, faces_coor
+
+def compute_eigenfaces(faces_mat, eigenfaces_num=100):
     """
-    # project all images in faces_mat on eigenvectors
-    img_proj = cv2.PCAProject(faces_mat, mean, eigenvecs)
-    mean_proj = np.mean(img_proj, axis=0)
-    cov_mat = np.cov(img_proj)
-    inv_cov_mat = np.linalg.inv(cov_mat)
-    return np.vstack((mean_proj, inv_cov_mat))
+    Copmutes eigenfaces using SVD
+    :param faces_mat: height x width x num_of_faces
+    :param eigenfaces_num: number of eigenfaces to output
+    :return: eigenfaces
+    """
+    faces_vecs = faces_mat.reshape((-1, faces_mat.shape[-1])).astype(np.float32)
+    faces_vecs_norm = faces_vecs - np.mean(faces_vecs, axis=1).reshape((-1, 1))
+    # faces_cov = np.dot(faces_vecs, faces_vecs.T)
+
+    print("Compute SVD")
+    [u, s, v] = np.linalg.svd(faces_vecs_norm)
+    eigenvecs = u[:, :eigenfaces_num]
+    eigenfaces = eigenvecs.reshape((faces_mat.shape[0], faces_mat.shape[1], -1))
+
+    # Project input on eigenfaces
+    faces_proj = np.dot(faces_vecs_norm.T, eigenvecs)
+    return eigenfaces, faces_proj
+
+def mean_eigenvecs(faces_mat, eigenfaces, labels):
+    """
+    Compute the mean projection of each person on the eigenvectors
+    :param faces_mat: 
+    :param eigenfaces: 
+    :param labels: 
+    :return: 
+    """
+    faces_vecs = faces_mat.reshape((-1, faces_mat.shape[-1])).astype(np.float32)
+    eigenvecs = eigenfaces.reshape((-1, eigenfaces.shape[-1]))
+
+    # Compute distance of each person to the eigenfaces
+    labels_unique = np.unique(labels)
+    mean_list = []
+    cov_list = []
+    for l in labels_unique:
+        cur_inds = np.flatnonzero(np.array(labels) == l)
+        cur_faces_vecs = faces_vecs[:, cur_inds].astype(np.float32)
+        cur_face_mean = np.mean(cur_faces_vecs, axis=1)
+        cur_face_mean -= np.mean(cur_face_mean)
+        proj_mean = np.dot(cur_face_mean, eigenvecs)
+        mean_list.append(proj_mean)
+        proj = np.dot(cur_faces_vecs.T, eigenvecs)
+        cov_list.append(np.cov(proj.T))
+    mean_vecs = np.vstack(mean_list).T
+    cov_mat = np.dstack(cov_list)
+    return mean_vecs, labels_unique, cov_mat
+
+def compute_mahal_dist(img, eigenvecs, mean_vecs, cov_mat):
+    """ compute the mahalanobis distance between a new face and people in training set.
+    :param img: the new face
+    :param eigenvecs: the eigenvectors
+    :param mean_vecs: the mean projection of each training set
+    :param cov_mat: the covariance matrix of each training set
+    """
+
+    assert img.ndim == 2, "Image must be 2 dimensional."
+    assert img.dtype == np.uint8, "Image must be uint8."
+    assert img.size == eigenvecs.shape[0], "Number of pixels must be as eigenvecs first dimension."
+    assert eigenvecs.shape[1] == mean_vecs.shape[0], "Number of eigenvectors should match."
+    assert mean_vecs.shape[1] == cov_mat.shape[2], "Number of people should match in mean_vecs and cov_mat."
+
+    # Reshape image to vector and project to eigenvecs space
+    vec = img.flatten().astype(np.float32)
+    vec -= np.mean(vec)
+    vec_p = np.dot(vec, eigenvecs)
+    vec_p = vec_p[:, np.newaxis]
+
+    # Compute Mahalanobis distance
+    dist_mahal = []
+
+    for person_ind in range(mean_vecs.shape[1]):
+        # Assuming only diagonal covariance
+        cov_inv = np.diag(1/np.diag(cov_mat[:, :, person_ind]))
+        mu = mean_vecs[:, person_ind]
+        tmp = vec_p - mu[:, np.newaxis]
+        d = np.sqrt(tmp.T.dot(cov_inv).dot(tmp))
+        dist_mahal.append(d[0][0])
+
+    return dist_mahal
+
+def classify(mahal_dist):
+
+    # Sort by Mahalnobis distance
+    sorted_inds = np.argsort(np.array(mahal_dist))
+
+    # choose the best matched label
+    min_dist_mahal = mahal_dist[sorted_inds[0]]
+
+    # Low ratio_test is wanted ( = good confidence in identification)
+    ratio_test = mahal_dist[sorted_inds[0]] / mahal_dist[sorted_inds[1]]
+    return sorted_inds[0], ratio_test
+
+def load_dataset(db_dir, verbose=False):
+    """ l
+    """
+    assert os.path.exists(db_dir), "DB folder %s doesn't exist" % db_dir
+
+    people_folders = os.listdir(db_dir)
+    labels = []
+    images = []
+
+    for person in people_folders:
+        img_files = os.listdir(os.path.join(db_dir, person))
+        for img_fn in img_files:
+            if verbose:
+                print("Reading: %s | %s | " % (person, img_fn), end="")
+            img = cv2.imread(os.path.join(db_dir, person, img_fn), cv2.IMREAD_GRAYSCALE)
+            faces, _ = find_faces(img)
+            if len(faces) == 1:
+                if verbose:
+                    print("face found")
+                images.append(faces[0])
+                labels.append(person)
+            else:
+                if verbose:
+                    print("no face found")
+    return images, labels
