@@ -15,7 +15,6 @@ from eigenfaces import find_faces
 
 def get_statistics(positive_dir, pos_num, negative_dir, neg_num):
     """
-    
     :param positive_dir: path for the positive examples directory
     :param pos_num: number of faces in the positive directory
     :param negative_dir: path for the negative examples directory
