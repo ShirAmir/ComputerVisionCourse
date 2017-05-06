@@ -45,14 +45,74 @@ This means it considers a deviation from a tight cluster more severely than in a
 "smarter" than less sophisticated measurements.  
 After that, we look for the label that minimized the distance for each test face, and assign that label to it. 
 If the minimal distance overshoots a certain threshold, it is considered to be very far from all the data sets 
-and is assigned the 'unknown'
-label. 
+and is assigned the 'unknown' label. 
 
 ### Results
 
 ### Building Instructions
+Building the project is pretty simple. Just clone the `facialRecognition` directory into your computer.
+Before running the program, make sure your python configuration complies with [README](../README.md) specifications.
 
 ### Using Instructions
+1. Open the command line in `src` directory.
+
+    <img src="images/utility/conda_prompt1.jpg" width="600" align="middle">  
+    
+2. Run our GUI by typing `python gui.py` into the command line.  
+    
+    <img src="images/utility/conda_prompt2.jpg" width="600" align="middle">    
+    
+    At this point the GUI window will be opened:  
+    
+    <img src="images/utility/gui1.jpg" width="600" align="middle">  
+    
+3. Configure the program's setting by pressing the correlating buttons on the left:  
+    <p>
+    <img src="images/utility/left_buttons.jpg" width="100" align="right">  
+    
+    * **Add Training Set** for adding another person to the training set.
+    * **Set Tested Image Path** for choosing the image to be analysed.
+    * **Set Output Directory** for choosing the directory for results.
+    </p>
+
+4. When pressing one of the aforementioned buttons the file explorer will be opened:
+
+    <img src="images/utility/file_explorer.jpg" width="600" align="middle">  
+
+    Then choose the requested file for *Set Tested Image Path* or a directory for *Add Training Set* or *Set Output Directory*. 
+
+    <span style="color:blue"> ***NOTE:*** The directory chosen for *Add Training Set* should contain images of the added person <span style="color:red"> **only** </span>. Also, the name of the chosen directory will be the label of the added person. </span>
+
+5. Next, configure the classification threshold on the right by inserting a different value into the textbox:
+
+    <img src="images/utility/thresh.jpg" width="100" align="middle">  
+
+5. After configuring the program, train the system by pressing the *Train* button. 
+
+    <img src="images/utility/train_btn.jpg" width="100" align="middle">  
+
+    During the training process the *Train* button will be pressed: 
+
+    <img src="images/utility/pressed_train_btn.jpg" width="100" align="middle">  
+
+    Once training is finished, the following message will appear on screen:
+
+    <img src="images/utility/training_complete.jpg" width="600" align="middle">  
+
+    <span style="color:blue"> ***NOTE:*** Do not press the training button multiple times, be patient until training is completed. </span>
+
+6. After training is complete, test your example by pressing *Test* button:
+
+    <img src="images/utility/test_btn.jpg" width="100" align="middle">  
+
+7. Then a window with the resulting image will appear:
+
+    <img src="images/utility/result.jpg" width="256" align="middle">  
+    
+    Also, the result will be saved in the output directory which is `results` directory by default.
+    One can close the result window by pressing *Esc* button or closing it manually.
+
+8. In order to close the program, one can simply press *Esc* or close in manually.
 
 #### Directory Tree
 
@@ -60,12 +120,26 @@ This is the tree of our project:
 
 ```
 facialRecognition
+├── images
+│   ├── train_data_set
+│   └── utility
+├── results
 ├── src  
-│   ├── train.py 
-│   └── test.py 
+│   ├── utility
+│   │   ├── haarcascade_eye.xml
+│   │   └── haarcascade_frontalface_default.xml
+│   ├── eigenfaces.py
+│   ├── gui.py
+│   ├── test.py
+│   ├── trian.py
+│   ├── train_data.npz
+│   └── result.csv
 └── guide.md 
 ```
 
-The sub-directory `src` contains all our code.
-`train.py` contains the implementation of training the set of faces, while `test.py` contains
-the code that detects and recognizes faces in an image.
+The sub-directory `images` contains all the images we use in the program. The database training images are in `training_data_set` directory and the images used to generate the guide are in `utility` sub-directory.  
+The sub-directory `results` is the default location for the program's output.  
+The sub-directory `src` contains all our code. The sub-directory inside it named `utility` contains the haarcascades used in *Viola-Jones* face detector.  
+`eigenfaces.py` contians all the code regarding computation and analysis of *eigenvectors*, `train.py` contains the code that trains the database images and `test.py` contains the code that tries to recognize faces from the database in a new image.  
+Also, `train_data.npz` contains the data acquired in the training stage and `result.csv` contains the analysis of the results.  
+Finally, `gui.py` contains the GUI implementation and is the file one must run inorder to activate the program.  
