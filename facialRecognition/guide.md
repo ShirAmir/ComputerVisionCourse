@@ -6,7 +6,7 @@ The program attemps to detect faces in an image and recognize the faces that app
 ### Algorithm & Implementation Details
 Our program contains 2 main stages - Training and Testing.  
 The training stage analyzes several data sets, each containing face images of a certain person. 
-And on the other hand, the testing stage detects new faces in an image and classifies them into the 
+On the other hand, the testing stage detects new faces in an image and classifies them into the 
 labels from the training stage.
 
 Here is what both stages do in a nutshell:  
@@ -19,11 +19,11 @@ __Train:__
 __Test:__  
     1. Detect & align faces in the test image.  
     2. Compute the distance between each new face and each data set.  
-    3. Classify which face belongs to each data sets and which do not belong to any.  
+    3. Classify each face to a person in the database or determine it isn't in the database.
 
 #### Training 
-During the training stage, several data sets are processed in order to achieve crucial data. 
-That includes the eigenfaces, the covariance matrices and the mean projections of each person.  
+During the training stage, several data sets are processed in order to achieve essential data. 
+That includes the eigenfaces, the mean projections and their covariance matrices of each person.  
 The eigenfaces are acquired by applying the Principal Component Analysis 
 ([PCA](https://en.wikipedia.org/wiki/Principal_component_analysis)) on all the acquired faces. 
 Then, we acquire the projection of all the faces in the data set on the face space.  
@@ -48,6 +48,26 @@ If the minimal distance overshoots a certain threshold, it is considered to be v
 and is assigned the 'unknown' label. 
 
 ### Results
+In order to provide comprehensive information about our systems capabilities, we tested it in several ways. 
+Here we will elaborate on some.   
+
+#### Testing Database Images
+The simplest test is to try to recognize the very images the system was trained on.
+Thus, we wrote the function `multi_test` in `test.py`. The function simply tests each image in the database that was used for training and returns the percentage of images that were recognized correctly and the complementary percentage of the images recognized incorrectly. 
+
+The results were pleasing. As the threshold rises, they converge to *86%* hit and *14%* miss.  
+The minimal threshold to give this pleasing result was 13.
+
+<img src="images/utility/graph1.jpg" width="500" align="middle">  
+
+#### Testing False Positives
+Later, we explored what happens when the system has to handle images that aren't in the database.
+We added them to our testing set under the label 'unknown' and ran the same test.
+
+In this case the results were less pleasing yet acceptable. As the threshold rose the hitting ratio increased, until reaching a maximum point at threshold value 12 with *69%* hit and *41%* miss. Then, the hitting ratio decreases towards a stable value.  
+
+<img src="images/utility/graph2.jpg" width="500" align="middle">  
+
 
 ### Building Instructions
 Building the project is pretty simple. Just clone the `facialRecognition` directory into your computer.

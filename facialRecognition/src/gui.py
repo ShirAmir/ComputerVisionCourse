@@ -90,7 +90,7 @@ label1 = Label(root, font="Gisha 12", fg='#006600', bg='#ccffcc', text="Classifi
 label1.grid(row=1, column=6, padx=0, pady=0)
 entry1 = Entry(root, font="Gisha 12", fg='#006600', textvariable=thresh, width=12)
 entry1.grid(row=2, column=6, padx=15, pady=0)
-thresh.set("12")
+thresh.set("13")
 
 # Footer inside images frame
 training_msg.set("")

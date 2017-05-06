@@ -155,10 +155,12 @@ def classify(mahal_dist):
     ratio_test = mahal_dist[sorted_inds[0]] / mahal_dist[sorted_inds[1]]
     return sorted_inds[0], ratio_test
 
-def load_dataset(db_dir, verbose=False, new_set=False):
+def load_dataset(db_dir, verbose=False):
     """ loads all the images and labels in the data base
     :param db_dir: the database dir
     :param verbose: show log or not
+    :return images: list of loaded images (only face RIO)
+    :return labels: list of correlating labels
     """
     assert os.path.exists(db_dir), "DB folder %s doesn't exist" % db_dir
 

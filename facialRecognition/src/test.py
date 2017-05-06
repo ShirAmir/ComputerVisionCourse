@@ -44,55 +44,31 @@ def test_face(face, eigenfaces, mean_vecs, labels, cov_mat, thresh=10.0):
         result_person = labels[class_ind]
     return result_person, min_dist
 
-def test_folder(folder, eigenfaces, mean_vecs, labels, cov_mat, thresh=1):
-    images, labels_test = ef.load_dataset(folder)
-    labels_pred = []
-    score = []
-    for ind, im in enumerate(images):
-        result_person, min_dist = test_image(im, eigenfaces, mean_vecs, labels, cov_mat, thresh)
-        labels_pred.append(result_person)
-        score.append(min_dist)
-    return labels_test, labels_pred, score
+def image_db_testing(dir_path, thresh):
+    """ test all the images in the database
+    :param dir_path: path to directory with testing images.
+    """
 
-def analyze_results(labels, labels_pred, score, in_db):
-    df = pd.DataFrame(np.vstack((labels, labels_pred, score, in_db)).T,
-                      columns=('gt', 'pred', 'score', 'in_db'))
+    # initialize counters
+    hits = 0
+    misses = 0
+    # Load tested images
+    test_images, test_labels = ef.load_dataset(dir_path)
+    # Load the trained data
+    eigenfaces, mean_vecs, labels, cov_mat = load_train_data()
 
-    # Check if prediction is correct
-    df['in_db'] = df['in_db'].astype(bool)
-    df['correct'] = df['gt'] == df['pred']
-    df.loc[~df['in_db'], 'correct'] = df.loc[~df['in_db'], 'pred'].isnull()
+    for i, img in enumerate(test_images):
+        result_person, _ = test_face(img, eigenfaces, mean_vecs, labels, cov_mat, thresh)
+        if result_person == test_labels[i]:
+            hits = hits + 1
+        else:
+            misses = misses + 1
 
-    # Divide to true/false samples
-    df_in_db = df[df['in_db']]
-    df_not_in_db = df[~df['in_db']]
-
-    # analyze true samples
-    num_samples = len(df)
-    num_in_db_samples = len(df_in_db)
-    num_not_in_db_samples = len(df_not_in_db)
-
-    correct_db_classification = df_in_db['correct'].sum()
-    incorrect_db_classification = num_in_db_samples - correct_db_classification
-
-    correct_not_in_db = df_not_in_db['correct'].sum()
-    incorrect_not_in_db = num_not_in_db_samples - correct_not_in_db
-
-    print("==============================================")
-    print("Total samples in DB: %d" % num_in_db_samples)
-    print("  Correctly classified: %d (%.1f%%)" %
-          (correct_db_classification, (correct_db_classification/float(num_in_db_samples))*100.0))
-    print("  Incorrectly classified: %d (%.1f%%)" %
-          (incorrect_db_classification, (incorrect_db_classification / float(num_in_db_samples)) * 100.0))
-
-    print("\nTotal samples not in DB: %d" % num_not_in_db_samples)
-    print("  Correctly classified as not in DB: %d (%.1f%%)" %
-          (correct_not_in_db, (correct_not_in_db/float(num_not_in_db_samples))*100.0))
-    print("  Incorrectly classified as person: %d (%.1f%%)" %
-          (incorrect_not_in_db, (incorrect_not_in_db/float(num_not_in_db_samples))*100.0))
-    print("==============================================")
-
-    df.to_csv("result.csv")
+    print("------------------------------------------------------")
+    print("threshold = %f" % thresh)
+    print("%f percent hits" % (hits / (hits + misses) * 100))
+    print("%f percent misses" % (misses / (hits + misses) * 100))
+    print("------------------------------------------------------")
 
 def run_testing(img_path, output_dir, thresh):
     """ Recognizes people from the database in the image.
@@ -134,19 +110,8 @@ def run_testing(img_path, output_dir, thresh):
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
-    """
-    labels_p, labels_pred_p, score_p = test_folder("../images/positive_test_images",
-                                             eigenfaces, mean_vecs, labels, cov_mat, thresh=10.0)
-    labels_n, labels_pred_n, score_n = test_folder("../images/negative_test_images",
-                                             eigenfaces, mean_vecs, labels, cov_mat, thresh=10.0)
-    labels = labels_p + labels_n
-    labels_pred = labels_pred_p + labels_pred_n
-    score = score_p + score_n
-    in_db = [True]*len(labels_p) + [False]*len(labels_n)
-    analyze_results(labels, labels_pred, score, in_db)
-    print("")
-    """
     return res_path
 
 if __name__ == "__main__":
-    run_testing()
+    for i in range(20):
+        image_db_testing('../images/train_data_set', i)
