@@ -3,15 +3,17 @@
 # ************ Merav Joseph 200652063 *************
 # ************* Shir Amir 209712801 ***************
 # *************************************************
+
 import sys
 import os
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import cv2
+from eigenfaces import find_faces
+
 CURRENT_PATH = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(CURRENT_PATH)
-from eigenfaces import find_faces
 
 def get_statistics(positive_dir, pos_num, negative_dir, neg_num):
     """
@@ -63,4 +65,3 @@ if __name__ == "__main__":
 
     print("easy set results: precision =  %.3f, recall = %.3f" % (precision_easy, recall_easy))
     print("hard set results: precision =  %.3f, recall = %.3f" % (precision_hard, recall_hard))
-

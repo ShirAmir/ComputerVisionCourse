@@ -16,10 +16,12 @@ import test
 def do_train():
     """ callback function """
     train.run_training()
+    training_msg.set("Training Complete!")
 
 def do_test():
     """ callback function """
-    res_path = test.run_testing(test_img_path.get(), output_dir.get())
+    training_msg.set("")
+    res_path = test.run_testing(test_img_path.get(), output_dir.get(), float(thresh.get()))
     """res = PIL.Image.open(res_path)
     res = PIL.ImageTk.PhotoImage(res)
     # image = Label(canvas, image=res, anchor=CENTER)
@@ -30,15 +32,19 @@ def do_test():
 
 def add_training_set():
     """ callback function """
+    training_msg.set("")
     new_training_set_path.set(askdirectory())
     train.add_training_set(new_training_set_path.get())
+    training_msg.set("Training Complete!")
 
 def set_image_path():
     """ callback function """
+    training_msg.set("")
     test_img_path.set(askopenfilename())
 
 def set_output_dir():
     """ callback function """
+    training_msg.set("")
     output_dir.set(askdirectory())
 
 root = Tk()
@@ -54,7 +60,8 @@ root.bind("<Escape>", lambda e: e.widget.quit())
 new_training_set_path = StringVar()
 test_img_path = StringVar()
 output_dir = StringVar()
-class_thresh = StringVar()
+thresh = StringVar()
+training_msg = StringVar()
 
 # Header
 headline = Label(root, font="Gisha 20 bold", bg='#ccffcc', fg='#006600', text="Facial Recognition App", anchor=CENTER)
@@ -67,10 +74,9 @@ btn2 = Button(root, font="Gisha 12", fg='#006600', bg='#b3ffb3', command=do_test
 btn2.grid(row=2, column=0, padx=15, pady=0)
 btn3 = Button(root, font="Gisha 12", fg='#006600', bg='#b3ffb3', command=add_training_set, text="Add Training \n Set", width=12)
 btn3.grid(row=3, column=0, padx=15, pady=0)
-new_training_set_path.set("../images/giraffes_train_labels.tif")
 btn4 = Button(root, font="Gisha 12", fg='#006600', bg='#b3ffb3', command=set_image_path, text="Set Tested \n Image Path", width=12)
 btn4.grid(row=4, column=0, padx=15, pady=0)
-test_img_path.set("../images/trump.jpg")
+test_img_path.set("../images/train_data_set/Ariel_Sharon/Ariel_Sharon_0001.jpg")
 btn5 = Button(root, font="Gisha 12", fg='#006600', bg='#b3ffb3', command=set_output_dir, text="Set Output \n Directory", width=12)
 btn5.grid(row=5, column=0, padx=15, pady=0)
 output_dir.set("../results/")
@@ -82,11 +88,14 @@ image = Label(canvas, image="", anchor=CENTER)
 # Right parameter settings
 label1 = Label(root, font="Gisha 12", fg='#006600', bg='#ccffcc', text="Classification \n Threshold:", width=15)
 label1.grid(row=1, column=6, padx=0, pady=0)
-entry1 = Entry(root, font="Gisha 12", fg='#006600', textvariable=class_thresh, width=12)
+entry1 = Entry(root, font="Gisha 12", fg='#006600', textvariable=thresh, width=12)
 entry1.grid(row=2, column=6, padx=15, pady=0)
-class_thresh.set("1")
+thresh.set("12")
 
 # Footer inside images frame
+training_msg.set("")
+msg_banner = Label(root, font="Gisha 14", fg='#006600', bg='#ccffcc', textvariable=training_msg, anchor=CENTER)
+msg_banner.grid(row=10, column=0, columnspan=7, padx=10, pady=10)
 explanations = "Press each button once and be patient :) \n press Esc to leave"
 footer = Label(root, font="Gisha 14", fg='#006600', bg='#ccffcc', text=explanations, anchor=CENTER)
 footer.grid(row=20, column=0, columnspan=7, padx=10, pady=10)

@@ -24,7 +24,7 @@ def load_train_data(fn="train_data.npz"):
 
     return eigenfaces, mean_vecs, labels, cov_mat
 
-def test_image(face, eigenfaces, mean_vecs, labels, cov_mat, thresh=10.0):
+def test_face(face, eigenfaces, mean_vecs, labels, cov_mat, thresh=10.0):
     """ recognizes the facae as a person in the database
     :param face: a scaled face image
     :param eigenfaces: the eigenfaces
@@ -44,13 +44,12 @@ def test_image(face, eigenfaces, mean_vecs, labels, cov_mat, thresh=10.0):
         result_person = labels[class_ind]
     return result_person, min_dist
 
-def test_folder(folder, eigenfaces, mean_vecs, labels, cov_mat, thresh=10.0):
+def test_folder(folder, eigenfaces, mean_vecs, labels, cov_mat, thresh=1):
     images, labels_test = ef.load_dataset(folder)
     labels_pred = []
     score = []
     for ind, im in enumerate(images):
-        result_person, min_dist = test_image(im, eigenfaces, mean_vecs,
-                                             labels, cov_mat, thresh)
+        result_person, min_dist = test_image(im, eigenfaces, mean_vecs, labels, cov_mat, thresh)
         labels_pred.append(result_person)
         score.append(min_dist)
     return labels_test, labels_pred, score
@@ -95,10 +94,11 @@ def analyze_results(labels, labels_pred, score, in_db):
 
     df.to_csv("result.csv")
 
-def run_testing(img_path, output_dir):
+def run_testing(img_path, output_dir, thresh):
     """ Recognizes people from the database in the image.
     :param img_path: path to the tested image
     :param output_dir: path to the output directory
+    :param thresh: threshold of maximal considered distance
     """
 
     # Load the trained data
@@ -107,9 +107,9 @@ def run_testing(img_path, output_dir):
     faces, faces_coor = ef.find_faces(img)
     label_list = []
     for i in range(len(faces)):
-        result_person, _ = test_image(faces[i], eigenfaces, mean_vecs, labels, cov_mat, thresh=10.0)
+        result_person, _ = test_face(faces[i], eigenfaces, mean_vecs, labels, cov_mat, thresh)
         label_list.append(result_person)
-    
+
     img = cv2.imread(img_path)
     i = 0
     for (x,y,w,h) in faces_coor:

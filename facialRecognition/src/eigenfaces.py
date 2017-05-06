@@ -3,12 +3,13 @@
 # ************ Merav Joseph 200652063 *************
 # ************* Shir Amir 209712801 ***************
 # *************************************************
+
 import os
 import numpy as np
 import cv2
 import matplotlib.pyplot as plt
 
-# constants
+# program constants
 SIZE_X = 128
 SIZE_Y = 128
 FACE_PATH = r"utility\haarcascade_frontalface_default.xml"
@@ -21,7 +22,8 @@ def find_faces(img, debug=False):
     """ Returns resized faces ROI. If no face detected, returns empty list.
     :param img: the image to face - detected. 
     :param debug: show extra data in debugging mode.
-    :return: list of detectd faces after resize to SIZE_X x SIZE_Y
+    :return faces: list of detectd faces' ROI resized to SIZE_X x SIZE_Y
+    :return faces_coor: coordinates of each detected face in original image
     """
 
     assert img.ndim == 2, "Image must be 2 dimensional."
@@ -54,17 +56,18 @@ def find_faces(img, debug=False):
     return faces, faces_coor
 
 def compute_eigenfaces(faces_mat, eigenfaces_num=100):
-    """
-    Copmutes eigenfaces using SVD
-    :param faces_mat: height x width x num_of_faces
+    """ Computes the eigenfaces.
+    :param faces_mat: contains all the faces in format height x width x num_of_faces
     :param eigenfaces_num: number of eigenfaces to output
-    :return: eigenfaces
+    :return eigenfaces: the eigenfaces of faces_mat
+    :return faces_proj: the projection of each face on the eigenfaces
     """
+
+    # Obtain normalized face vectors
     faces_vecs = faces_mat.reshape((-1, faces_mat.shape[-1])).astype(np.float32)
     faces_vecs_norm = faces_vecs - np.mean(faces_vecs, axis=1).reshape((-1, 1))
-    # faces_cov = np.dot(faces_vecs, faces_vecs.T)
 
-    print("Compute SVD")
+    # Compute SVD decomposition on the noramlized face vectors
     [u, s, v] = np.linalg.svd(faces_vecs_norm)
     eigenvecs = u[:, :eigenfaces_num]
     eigenfaces = eigenvecs.reshape((faces_mat.shape[0], faces_mat.shape[1], -1))
@@ -74,12 +77,13 @@ def compute_eigenfaces(faces_mat, eigenfaces_num=100):
     return eigenfaces, faces_proj
 
 def mean_eigenvecs(faces_mat, eigenfaces, labels):
-    """
-    Compute the mean projection of each person on the eigenvectors
-    :param faces_mat: 
-    :param eigenfaces: 
-    :param labels: 
-    :return: 
+    """ Compute the mean projection of each person on the eigenvectors.
+    :param faces_mat: contains all the faces in format height x width x num_of_faces
+    :param eigenfaces: the eigenfaces
+    :param labels: the labels of all people in training set
+    :return mean_vecs: the mean projection of each person on the eigenvectors 
+    :return labels_unique: all the names of people in the training set 
+    :return cov_mat: the covariance matrices of each mean projection 
     """
     faces_vecs = faces_mat.reshape((-1, faces_mat.shape[-1])).astype(np.float32)
     eigenvecs = eigenfaces.reshape((-1, eigenfaces.shape[-1]))
@@ -107,6 +111,7 @@ def compute_mahal_dist(img, eigenvecs, mean_vecs, cov_mat):
     :param eigenvecs: the eigenvectors
     :param mean_vecs: the mean projection of each training set
     :param cov_mat: the covariance matrix of each training set
+    :return dist_mahal: the list of mahalanobis distances between img and each person
     """
 
     assert img.ndim == 2, "Image must be 2 dimensional."
@@ -121,7 +126,7 @@ def compute_mahal_dist(img, eigenvecs, mean_vecs, cov_mat):
     vec_p = np.dot(vec, eigenvecs)
     vec_p = vec_p[:, np.newaxis]
 
-    # Compute Mahalanobis distance
+    # Compute Mahalanobis Distance
     dist_mahal = []
 
     for person_ind in range(mean_vecs.shape[1]):
@@ -135,6 +140,10 @@ def compute_mahal_dist(img, eigenvecs, mean_vecs, cov_mat):
     return dist_mahal
 
 def classify(mahal_dist):
+    """ Match an image to its most similar face in the database
+    :param mahal_dist: the Mahalanobis distances if the image to each person in the database.
+    :return: index of best fitting distance and ratio_test
+    """
 
     # Sort by Mahalnobis distance
     sorted_inds = np.argsort(np.array(mahal_dist))

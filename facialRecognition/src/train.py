@@ -14,6 +14,7 @@ import eigenfaces as ef
 TRAIN_DIR = "../images/train_data_set"
 
 def run_training():
+    """ Training the database images """
 
     # Load the datasets
     images, labels = ef.load_dataset(TRAIN_DIR, True)
