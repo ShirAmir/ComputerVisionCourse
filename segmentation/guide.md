@@ -77,7 +77,9 @@ Just clone the `segmentation` directory into your computer.
 Before running the program, make sure your python configuration complies with  
 [README](../README.md "README file") specifications.  
 
-#### GUI Doesn't Work
+***NOTE***: This specific assignment requiered *Skicit-Image* package for computing the superpixels. If you don't have it preinstalled, simple run `conda install scikit-image` in the conda prompt. 
+
+#### What if the GUI Doesn't Work?
 In some systems the GUI may not work because new versions of *PIL* library desist to contain *TK* binding files. 
 In this case it's best to uninstall *PIL* and *Pillow* libraries by typing `conda remove PIL` and 
 `conda remove pillow` in to the conda prompt. Later, install *Pillow* using *pip installer* by typing 
