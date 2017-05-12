@@ -37,7 +37,7 @@ Finally, the requested parameters are saved in `train_data.npz`.
 
 2. **Compute the distance between each new face and each data set**- We decided to use the [Mahalanobis Distance](https://en.wikipedia.org/wiki/Mahalanobis_distance) as our measuring method. We chose this measuring method because it uses the standard deviation of the cluster as a measurement unit. This means it considers a deviation from a tight cluster more severely than in a spreaded cluster, and is thus "smarter" than less sophisticated measurements.  
 The mahalanobis distance between an observation x and a set of observations with mean mu is calculated as: 
-<img src="images/utility/utility/mahalanobis.jpg" width="200" align="middle">, 
+<img src="images/utility/mahalanobis.jpg" width="200" align="middle">, 
 when S is the covariance matrix of x. Thus, one needs the covariance matrix of the newly detected face and the mean projection of a person inorder to compute their Mahalanobis distance.  
 
 3. **Classify each face to a person in the database or determine it isn't in the database**- After we calculated the Mahalanobis Distance between each newly detected face and each person in the database, we classified each face as the person closest to it. If the distance between the new face and its closest person was larger than a certain threshold, we classified it as 'unknown'.  
@@ -50,18 +50,18 @@ Here we will elaborate on some.
 We measure our success with to different measures - *precision* and *recall*.  
 Assume one wishes to select relevant data out of many data items. A solid way to measure his success is by checking how many relevant points were selected and how many of the selected points were relevat.
 
-<img src="images/utility/utility/precision_recall.jpg" width="300" align="middle">
+<img src="images/utility/precision_recall.jpg" width="300" align="middle">
 
 That is precisely what presicion and recall measure. Precision checks how many selected items are genuinely relevant while recall checks the amount of relevant items that were selected.
 
-<img src="images/utility/utility/precision_recall_explanation.jpg" width="300" align="middle">
+<img src="images/utility/precision_recall_explanation.jpg" width="300" align="middle">
 
 #### Testing 10 Faces
 At first, we used 10 datasets of different people in order to train the system. Then we tested the system by trying to recognize a set of images. Most of the images were indeed of people from the training datasets, yet we included some images of people which were not trained to explore *false positive* cases.
 
 We measured our preformances in correlation to the minimal distance threshold, by calculating the precision and recall. 
 
-<img src="images/utility/utility/figure_1.png" width="400" align="middle">
+<img src="images/utility/figure_1.png" width="400" align="middle">
 
 As one can see, when choosing the threshold to be 9: recall is approximately 55% and precision is approximately 92%. 
 
@@ -70,29 +70,29 @@ Another great test to check if the system works is to use the training images as
 
 We measured our preformances in correlation to the minimal distance threshold, by calculating the precision and recall. 
 
-<img src="images/utility/utility/figure_1.png" width="400" align="middle">
+<img src="images/utility/figure_1.png" width="400" align="middle">
 
 As one can see, when choosing the threshold to be 9: recall is slightly above 80% and precision is 100% (since there are no irrelevant images to be chosen).
 
 #### Testing on Unseen Images
 No image in our test set appears in the training set. Thus, every properly classified image from the test set could qualify as a valid example in this section. Here are a few examples:
 
-<img src="images/utility/utility/Lleyton_Hewitt.jpg" width="200" align="middle">
+<img src="images/utility/Lleyton_Hewitt.jpg" width="200" align="middle">
 
-<img src="images/utility/utility/Tony_Blair.jpg" width="200" align="middle">
+<img src="images/utility/Tony_Blair.jpg" width="200" align="middle">
 
-<img src="images/utility/utility/Laura_Bush.jpg" width="200" align="middle">
+<img src="images/utility/Laura_Bush.jpg" width="200" align="middle">
 
 #### Adding a Training Set
 Another fine test for determining the quality of the system is to add a new face to the training set and examine the consequences. In this case, we will add the *Winona Rider* set to the database. It can be found under `images` directory. 
 
 Before adding it, Winona's images were categorized as 'unknown':
 
-<img src="images/utility/utility/Winona_Rider_Unknown.jpg" width="200" align="middle">
+<img src="images/utility/Winona_Rider_Unknown.jpg" width="200" align="middle">
 
 After adding here to the training set, they were classified as herself:
 
-<img src="images/utility/utility/Winona_Rider_Known.jpg" width="200" align="middle">
+<img src="images/utility/Winona_Rider_Known.jpg" width="200" align="middle">
 
 #### System Disadvatages
 
@@ -112,20 +112,20 @@ Before running the program, make sure your python configuration complies with [R
 
 1. Open the command line in `src` directory.
 
-    <img src="images/utility/utility/conda_prompt1.jpg" width="600" align="middle">  
+    <img src="images/utility/conda_prompt1.jpg" width="600" align="middle">  
     
 2. Run our GUI by typing `python gui.py` into the command line.  
     
-    <img src="images/utility/utility/conda_prompt2.jpg" width="600" align="middle">    
+    <img src="images/utility/conda_prompt2.jpg" width="600" align="middle">    
     
     At this point the GUI window will be opened:  
     
-    <img src="images/utility/utility/gui1.jpg" width="600" align="middle">  
+    <img src="images/utility/gui1.jpg" width="600" align="middle">  
     
 3. Configure the program's setting by pressing the correlating buttons on the left:  
 
     <p>
-    <img src="images/utility/utility/left_buttons.jpg" width="100" align="right">  
+    <img src="images/utility/left_buttons.jpg" width="100" align="right">  
     
     * **Add Training Set** for adding another person to the training set.
     * **Set Tested Image Path** for choosing the image to be analysed.
@@ -134,7 +134,7 @@ Before running the program, make sure your python configuration complies with [R
 
 4. When pressing one of the aforementioned buttons the file explorer will be opened:
 
-    <img src="images/utility/utility/file_explorer.jpg" width="600" align="middle">  
+    <img src="images/utility/file_explorer.jpg" width="600" align="middle">  
 
     Then choose the requested file for *Set Tested Image Path* or a directory for *Add Training Set* or *Set Output Directory*. 
 
@@ -142,29 +142,29 @@ Before running the program, make sure your python configuration complies with [R
 
 5. Next, configure the classification threshold on the right by inserting a different value into the textbox:
 
-    <img src="images/utility/utility/thresh.jpg" width="100" align="middle">  
+    <img src="images/utility/thresh.jpg" width="100" align="middle">  
 
 6. After configuring the program, train the system by pressing the *Train* button. 
 
-    <img src="images/utility/utility/train_btn.jpg" width="100" align="middle">  
+    <img src="images/utility/train_btn.jpg" width="100" align="middle">  
 
     During the training process the *Train* button will be pressed: 
 
-    <img src="images/utility/utility/pressed_train_btn.jpg" width="100" align="middle">  
+    <img src="images/utility/pressed_train_btn.jpg" width="100" align="middle">  
 
     Once training is finished, the following message will appear on screen:
 
-    <img src="images/utility/utility/training_complete.jpg" width="600" align="middle">  
+    <img src="images/utility/training_complete.jpg" width="600" align="middle">  
 
     <span style="color:blue"> ***NOTE:*** Do not press the training button multiple times, be patient until training is completed. </span>
 
 7. After training is complete, test your example by pressing *Test* button:
 
-    <img src="images/utility/utility/test_btn.jpg" width="100" align="middle">  
+    <img src="images/utility/test_btn.jpg" width="100" align="middle">  
 
 8. Then a window with the resulting image will appear:
 
-    <img src="images/utility/utility/result.jpg" width="256" align="middle">  
+    <img src="images/utility/result.jpg" width="256" align="middle">  
     
     Also, the result will be saved in the output directory which is `results` directory by default.
     One can close the result window by pressing *Esc* button or closing it manually.

@@ -50,8 +50,10 @@ def image_db_testing(dir_path, thresh):
     """
 
     # initialize counters
-    hits = 0
-    misses = 0
+    true_positive = 0
+    false_negative = 0
+    false_positive = 0
+
     # Load tested images
     test_images, test_labels = ef.load_dataset(dir_path)
     # Load the trained data
@@ -59,35 +61,41 @@ def image_db_testing(dir_path, thresh):
 
     for i, img in enumerate(test_images):
         result_person, _ = test_face(img, eigenfaces, mean_vecs, labels, cov_mat, thresh)
-        if result_person == test_labels[i]:
-            hits = hits + 1
-        else:
-            misses = misses + 1
-
-    print("------------------------------------------------------")
-    print("threshold = %f" % thresh)
-    print("%f percent hits" % (hits / (hits + misses) * 100))
-    print("%f percent misses" % (misses / (hits + misses) * 100))
-    print("------------------------------------------------------")
-
+        if test_labels[i] in labels: # if the new face belongs to a trained person
+            if result_person == test_labels[i]:
+                true_positive = true_positive + 1
+            else:
+                print('false negative index: %s %d' % (test_labels[i], i))
+                false_negative = false_negative + 1
+        elif result_person != 'unknown':
+            false_positive = false_positive + 1
+    
+    precision = true_positive / (true_positive + false_positive) * 100
+    recall = true_positive / (true_positive + false_negative) * 100
+    return precision, recall
+    
 def run_testing(img_path, output_dir, thresh):
     """ Recognizes people from the database in the image.
     :param img_path: path to the tested image
     :param output_dir: path to the output directory
     :param thresh: threshold of maximal considered distance
     """
+    print("------------TEST-------------")
 
     # Load the trained data
+    print("Load trained data.")
     eigenfaces, mean_vecs, labels, cov_mat = load_train_data()
     img = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
     faces, faces_coor = ef.find_faces(img)
     label_list = []
+    print("Finding faces.")
     for i in range(len(faces)):
         result_person, _ = test_face(faces[i], eigenfaces, mean_vecs, labels, cov_mat, thresh)
         label_list.append(result_person)
 
     img = cv2.imread(img_path)
     i = 0
+    print("Marking faces.")
     for (x,y,w,h) in faces_coor:
         if label_list[i] == 'unknown':
             color = (0, 0, 255)
@@ -96,15 +104,17 @@ def run_testing(img_path, output_dir, thresh):
         cv2.rectangle(img, (x,y), (x+w, y+h), color, 2)
         cv2.putText(img, label_list[i], (x, y+h+20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
         i = i+1
-
+    
     # Find a file name that isn't taken
     i = 1
     while os.path.isfile('%s%s%d%s' % (output_dir, 'result', i, '.tif')):
         i = i + 1
 
     # Save the result
+    print("Saving results. ")
     res_path = '%s%s%d%s' % (output_dir, 'result', i, '.tif')
     cv2.imwrite(res_path, img)
+    print("-----------------------------")
 
     cv2.imshow('img',img)
     cv2.waitKey(0)
@@ -113,5 +123,28 @@ def run_testing(img_path, output_dir, thresh):
     return res_path
 
 if __name__ == "__main__":
-    for i in range(20):
-        image_db_testing('../images/train_data_set', i)
+    precision_list = []
+    recall_list = []
+    START = 7
+    END = 20
+    i = START
+    while i <= END:
+        print(i)
+        precision, recall = image_db_testing('../images/test_data_sets', i)
+        precision_list.append(precision)
+        recall_list.append(recall)
+        i = i + 1
+
+    # Plot results
+    plt.subplot(121)
+    plt.plot(range(START, END+1), precision_list, 'r--')
+    plt.ylabel('precision [in %]')
+    plt.xlabel('threshold')
+    plt.title('precision(threshold)')
+    plt.subplot(122)
+    plt.plot(range(START, END+1), recall_list, 'r--')
+    plt.ylabel('recall [in %]')
+    plt.xlabel('threshold')
+    plt.title('recall(threshold)')    
+    plt.show()
+   

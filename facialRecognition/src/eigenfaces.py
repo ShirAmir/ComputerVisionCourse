@@ -18,10 +18,12 @@ FACE_CLASSIFIER = cv2.CascadeClassifier(FACE_PATH)
 EYE_CLASSIFIER = cv2.CascadeClassifier(EYE_PATH)
 IMG_LENGTH = SIZE_X * SIZE_Y
 
-def find_faces(img, debug=False):
+def find_faces(img, debug=False, scale_factor=1.3, min_neighbors=5):
     """ Returns resized faces ROI. If no face detected, returns empty list.
     :param img: the image to face - detected. 
     :param debug: show extra data in debugging mode.
+    :param scale_factor: Viola-Jones parameter.
+    :param min_neighbors: Viola-Jones parameter.
     :return faces: list of detectd faces' ROI resized to SIZE_X x SIZE_Y
     :return faces_coor: coordinates of each detected face in original image
     """
@@ -30,7 +32,7 @@ def find_faces(img, debug=False):
     assert img.dtype == np.uint8, "Image must be of type uint8."
 
     # detect faces in image
-    detected_faces = FACE_CLASSIFIER.detectMultiScale(img, 1.3, 5)
+    detected_faces = FACE_CLASSIFIER.detectMultiScale(img, scale_factor, min_neighbors)
     faces = []
     faces_coor = []
 

@@ -1,11 +1,9 @@
 # *************************************************
-# *** Semantic Segmentation from Training Image ***
+# ******** Facial Detection and Recognition *******
 # ************ Merav Joseph 200652063 *************
 # ************* Shir Amir 209712801 ***************
 # *************************************************
 
-import PIL.Image
-import PIL.ImageTk
 from tkinter import *
 from tkinter.filedialog import askopenfilename
 from tkinter.filedialog import askdirectory
@@ -35,7 +33,6 @@ def add_training_set():
     training_msg.set("")
     new_training_set_path.set(askdirectory())
     train.add_training_set(new_training_set_path.get())
-    training_msg.set("Training Complete!")
 
 def set_image_path():
     """ callback function """
@@ -76,7 +73,7 @@ btn3 = Button(root, font="Gisha 12", fg='#006600', bg='#b3ffb3', command=add_tra
 btn3.grid(row=3, column=0, padx=15, pady=0)
 btn4 = Button(root, font="Gisha 12", fg='#006600', bg='#b3ffb3', command=set_image_path, text="Set Tested \n Image Path", width=12)
 btn4.grid(row=4, column=0, padx=15, pady=0)
-test_img_path.set("../images/train_data_set/Ariel_Sharon/Ariel_Sharon_0001.jpg")
+test_img_path.set("../images/test_data_sets/Lleyton_Hewitt/Lleyton_Hewitt_0024.jpg")
 btn5 = Button(root, font="Gisha 12", fg='#006600', bg='#b3ffb3', command=set_output_dir, text="Set Output \n Directory", width=12)
 btn5.grid(row=5, column=0, padx=15, pady=0)
 output_dir.set("../results/")
@@ -90,7 +87,7 @@ label1 = Label(root, font="Gisha 12", fg='#006600', bg='#ccffcc', text="Classifi
 label1.grid(row=1, column=6, padx=0, pady=0)
 entry1 = Entry(root, font="Gisha 12", fg='#006600', textvariable=thresh, width=12)
 entry1.grid(row=2, column=6, padx=15, pady=0)
-thresh.set("13")
+thresh.set("9")
 
 # Footer inside images frame
 training_msg.set("")
