@@ -4,13 +4,13 @@ The course's webpage can be found [here](http://cs.haifa.ac.il/hagit/courses/CV)
 
 ### Workspace
 We use **Anaconda 2.4.0** Python Distribution on **Windows 10**.
-Just download `Anaconda3-2.4.0-Windows-x86_64.zip` from [this link](https://repo.continuum.io/archive/.winzip/ "zipped Windows installers"), unzip and install.  
+Just download `Anaconda3-2.4.0-Windows-x86_64.zip` from [this link](https://repo.continuum.io/archive/.winzip/ "zipped Windows installers"), unzip and install. 
+
 Also, we use **Python 3.5.3** with the following primary modules:
-  * Numpy 1.12.1
-  * Opencv 3.1.0
-  * Scikit-image 0.12.3
-  * Matplotlib 2.0.0
-  * Tk 8.5.18
+  * **OpenCV 3.1.0** for computer vision algorithms.
+  * **Numpy 1.12.1** for vectorail manipulation. 
+  * **Matplotlib 2.0.0** for data visualizing.
+  * **Tk 8.5.18** for creating GUI.
 
 After setting up Anaconda, make sure all the following modules are up-to-date:
   * Cython >= 0.23
@@ -20,6 +20,7 @@ After setting up Anaconda, make sure all the following modules are up-to-date:
   * NetworkX >= 1.8
   * Pillow >= 2.1.0
   * PyWavelets >= 0.4.0
+  * Scikit-image >= 0.12.3
 
 This can be done by type `conda list` in the conda prompt and observe the different modules.  
 In case one needs to be installed or updated, simply type `conda module_name install` in the conda prompt. 
