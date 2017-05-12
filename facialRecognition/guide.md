@@ -84,7 +84,7 @@ No image in our test set appears in the training set. Thus, every properly class
 <img src="images/utility/Laura_Bush.jpg" width="200" align="middle">
 
 #### Adding a Training Set
-Another fine test for determining the quality of the system is to add a new face to the training set and examine the consequences. In this case, we will add the *Winona Rider* set to the database. It can be found under `images` directory. 
+Another fine test for determining the quality of the system is to add a new face to the training set and examine the consequences. In this case, we will add the *Winona Ryder* set to the database. It can be found under `images` directory. 
 
 Before adding it, Winona's images were categorized as 'unknown':
 
