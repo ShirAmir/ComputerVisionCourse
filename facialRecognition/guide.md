@@ -104,6 +104,10 @@ Despite the nice results we've shown in the aforementioned sections, our system 
 
 3. **Poor face detection** - The first stage in our system is face detection. It is obviously necessary for face recognition. In our system, the face detection was done using the familiar Viola-Jones algorithm. Despite that, the preformaces of the algorithm are very poor (about 50% detection) even after recalibrating the algorithms parameters. A solution would be to substitute the Viola-Jones face detection algorithm with a different more advaced face detector, probably involving machine learning. 
 
+#### Changing the Amount of Eigenfaces
+When trying to calibrate our system, we found that increasing the amount of eigenfaces improves the results in measures of recall and precision. That said, at a certain point adding more eigenfaces doesn't help anymore.  
+This phenomenon is easy to explain: when increasing the amount of eigenfacess at first, more base vectors are avaliable to construct a face. Since different people have different faces, more base vectors allow discovering more faces. On the other hand, once including most of the eigenfaces which correlate to high eigenvalues, one is left with many eigenvectors that differ from the average face only by minor changes. Thus, they do not help diversify the faces we detect. Hence, using these new eigenfaces doesn't increase the system's preformances. 
+
 ### Building Instructions
 Building the project is pretty simple. Just clone the `facialRecognition` directory into your computer.
 Before running the program, make sure your python configuration complies with [README](../README.md) specifications.
