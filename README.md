@@ -30,3 +30,4 @@ OpenCV is installed by typing `conda install -c menpo opencv3=3.1.0` in the cond
 This course requires 5 assignments:
   1. [Segmentation](/segmentation/guide.md)
   2. [Facial Recognition](/facialRecognition/guide.md)
+  3. [Motion Tracking](/bugTracker/guide.md)
