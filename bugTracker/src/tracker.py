@@ -7,7 +7,7 @@
 import numpy as np
 import cv2
 
-cap = cv2.VideoCapture('../videos/bugs12.mp4')
+cap = cv2.VideoCapture('../videos/bugs14.mp4')
 
 fgbg = cv2.bgsegm.createBackgroundSubtractorMOG()
 
@@ -16,12 +16,13 @@ while(True):
     ret, frame = cap.read()
 
     # Our operations on the frame come here
-    #gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     fgmask = fgbg.apply(frame)
+    im2, contours, hierarchy = cv2.findContours(fgmask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    cv2.drawContours(frame, contours, -1, (255, 0, 0), 1, 8)
 
     # Display the resulting frame
-    #cv2.imshow('frame',gray)
-    cv2.imshow('frame',fgmask)
+    cv2.imshow('frame',frame)
     if cv2.waitKey(30) & 0xFF == ord('q'):
         break
 
