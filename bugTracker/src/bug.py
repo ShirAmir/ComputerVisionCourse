@@ -13,8 +13,8 @@ MEASURE_NUM = 2
 
 
 class Bug:
-    bug_counter = 1
-    max_path_length = 20
+    bug_counter = 0
+    max_path_length = 10
 
     def __init__(self, start_point):
         # The bug's kalman tracker
