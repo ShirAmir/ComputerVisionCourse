@@ -16,11 +16,11 @@ Also, we use **Python 3.5.3** with the following primary modules:
 Easy! Simply create a new environment within your Anaconda distribution.
 Conda enables us to create, delete and configure different environments, with different python versions and packages.
 Here we will show how to create an environment to match this repository's prerequisits. 
- 0. type `python --version` in your conda prompt. If it output's 3.5.3 then you're good to go and you can skip this paragraph. :smile:
- 1. In your conda prompt type `conda create -n cvCourse python=3.5.3 numpy`. This command creates an environment named *cvCourse* with the python 3.5.3 and numpy.
- 2. Activate your new environment by typing `activate cvCourse` in your conda prompt. At this point the name of your new environment should be displayed within parethesis on the left side of your path in the conda prompt. YOu can check the environment's python version by typing `python --version` in your conda prompt. It should now output python 3.5.3.
- 3. Now you must add relevant packeges to your environment as specified in the next paragraph.
- 4. Finaly once done with the environment deactivate it by typing `deactivate cvCourse` in your conda prompt. At this point the name of your new environment within the prenthesis should disappear from the left side of your path in the conda prompt.
+ 1. type `python --version` in your conda prompt. If it output's 3.5.3 then you're good to go and you can skip this paragraph. :smile:
+ 2. In your conda prompt type `conda create -n cvCourse python=3.5.3 numpy`. This command creates an environment named *cvCourse* with the python 3.5.3 and numpy.
+ 3. Activate your new environment by typing `activate cvCourse` in your conda prompt. At this point the name of your new environment should be displayed within parethesis on the left side of your path in the conda prompt. YOu can check the environment's python version by typing `python --version` in your conda prompt. It should now output python 3.5.3.
+ 4. Now you must add relevant packeges to your environment as specified in the next paragraph.
+ 5. Finaly once done with the environment deactivate it by typing `deactivate cvCourse` in your conda prompt. At this point the name of your new environment within the prenthesis should disappear from the left side of your path in the conda prompt.
  
 ***NOTE: make sure you activate your environment before trying to run the code!***
 
