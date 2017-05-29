@@ -19,7 +19,7 @@ def set_output_dir():
     output_dir.set(askdirectory())
 
 def start():
-    tracker.track(video_path.get(), int(contour_size_thresh.get()))
+    tracker.track(video_path.get(), int(contour_size_thresh.get()), output_dir.get())
 
 root = Tk()
 root.title("Multi Tracker")

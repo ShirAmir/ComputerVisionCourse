@@ -10,8 +10,9 @@ import cv2
 import matplotlib.pyplot as plt
 from scipy.optimize import linear_sum_assignment
 import bug
+import os
 
-def track(video_path, contour_size_thresh):
+def track(video_path, contour_size_thresh, output_dir):
     FRAME_HISTORY = 10
     EXIT_BORDER = 10
 
@@ -23,6 +24,18 @@ def track(video_path, contour_size_thresh):
     frame_num = 0
     show_box = 1
     show_trail = 1
+
+    # Find a file name that isn't taken
+    i = 1
+    while os.path.isfile('%s%s%d%s' % (output_dir, '/result', i, '.mp4')):
+        i = i + 1 
+
+    # Capture frame-by-frame
+    ret, frame = video.read()
+
+    fourcc = cv2.VideoWriter_fourcc(*'DIVX')
+    frame_size = (np.shape(frame)[1], np.shape(frame)[0])
+    new_video = cv2.VideoWriter('%s%s%d%s' % (output_dir, '/result', i, '.mp4'), fourcc, 20.0, frame_size)
 
     while (True):
         # Capture frame-by-frame
@@ -122,6 +135,7 @@ def track(video_path, contour_size_thresh):
             cv2.putText(disp_frame, "%d Bugs in frame" % len(centroid_ind), (10, 20), cv2.FONT_HERSHEY_PLAIN, 1.0, (0, 0, 0))
             # Display the resulting frame
             cv2.imshow('frame', cv2.cvtColor(disp_frame, cv2.COLOR_BGR2RGB))
+            new_video.write(cv2.cvtColor(disp_frame, cv2.COLOR_BGR2RGB))
             key = cv2.waitKey(60) & 0xFF
             if key == ord('t'):
                 show_trail = 1 - show_trail
@@ -148,4 +162,5 @@ def track(video_path, contour_size_thresh):
     # When everything done, release the capture
     bug.Bug.bug_counter = 0
     video.release()
+    new_video.release()
     cv2.destroyAllWindows()
