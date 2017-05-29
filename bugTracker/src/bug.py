@@ -29,6 +29,7 @@ class Bug:
                                                  [0, 0, 1, 0],
                                                  [0, 0, 0, 1]],
                                                 np.float32)
+
         self.kalman.processNoiseCov = np.array([[1, 0, 0, 0],
                                                 [0, 1, 0, 0],
                                                 [0, 0, 1, 0],
@@ -60,14 +61,14 @@ class Bug:
         # self.path.append(np.array([cx, cy]))
         self.path.append(point_observation)
 
-    def plot_on_img(self, img, contour=None):
-        for j, step in enumerate(reversed(self.path)):
-            cv2.circle(img, (step[0], step[1]), max(1, int(4 - j * 0.3)), self.color, -1)
-        if contour is not None:
+    def plot_on_img(self, img, show_box, show_trail, contour=None):
+        if show_trail == 1:
+            for j, step in enumerate(reversed(self.path)):
+                cv2.circle(img, (step[0], step[1]), max(1, int(4 - j * 0.3)), self.color, -1)
+        if contour is not None and show_box == 1:
             x, y, w, h = cv2.boundingRect(contour)
             cv2.rectangle(img, (x, y), (x + w, y + h), self.color, 2)
             cv2.putText(img, self.__str__(), (x, y + h + 20), cv2.FONT_HERSHEY_PLAIN, 1.0, self.color, 1)
-        return img
 
     def __str__(self):
         bug_str = 'bug ' + str(self.id)
