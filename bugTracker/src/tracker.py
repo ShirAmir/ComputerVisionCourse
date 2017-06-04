@@ -10,8 +10,9 @@ import cv2
 import matplotlib.pyplot as plt
 from scipy.optimize import linear_sum_assignment
 import bug
+import os
 
-def track(video_path, contour_size_thresh):
+def track(video_path, contour_size_thresh, output_dir):
     FRAME_HISTORY = 10
     EXIT_BORDER = 10
 
@@ -21,6 +22,20 @@ def track(video_path, contour_size_thresh):
                                                     backgroundRatio=0.1, noiseSigma=0)
     bugs = []
     frame_num = 0
+    show_box = 1
+    show_trail = 1
+
+    # Find a file name that isn't taken
+    i = 1
+    while os.path.isfile('%s%s%d%s' % (output_dir, '/result', i, '.mp4')):
+        i = i + 1 
+
+    # Capture frame-by-frame
+    ret, frame = video.read()
+
+    fourcc = cv2.VideoWriter_fourcc(*'DIVX')
+    frame_size = (np.shape(frame)[1], np.shape(frame)[0])
+    new_video = cv2.VideoWriter('%s%s%d%s' % (output_dir, '/result', i, '.mp4'), fourcc, 20.0, frame_size)
 
     while (True):
         # Capture frame-by-frame
@@ -28,6 +43,7 @@ def track(video_path, contour_size_thresh):
         if ret == False:
             break
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        disp_frame = frame.copy()
         frame_num = frame_num + 1
         # cv2.putText(frame, "#%d" % frame_num, (3, 12), cv2.FONT_HERSHEY_PLAIN, 1.0, (0, 127, 0), 1)
 
@@ -61,7 +77,7 @@ def track(video_path, contour_size_thresh):
             centroids_list.append(measure)
             # for debug -- show centriod
             # TODO: move drawing to final drawing stage
-            cv2.circle(frame, (cx, cy), 3, (255, 0, 0), 1)
+            cv2.circle(disp_frame, (cx, cy), 3, (255, 0, 0), 1)
         centroids = np.array(centroids_list)
 
         if len(bugs) == 0:
@@ -83,7 +99,7 @@ def track(video_path, contour_size_thresh):
 
                 for i in range(len(centroid_ind)):
                     bugs[bug_ind[i]].update_path(centroids[centroid_ind[i]])
-                    bugs[bug_ind[i]].plot_on_img(frame, contours[centroid_ind[i]])
+                    bugs[bug_ind[i]].plot_on_img(disp_frame, show_box, show_trail, contours[centroid_ind[i]])
 
                 # Number of bugs < number of centroids
                 # We want to add more bugs
@@ -114,12 +130,37 @@ def track(video_path, contour_size_thresh):
                         distance = np.sqrt((centroids[:, 0] - last_pos[0]) ** 2 + (centroids[:, 1] - last_pos[1]) ** 2)
                         closest_centroid_ind = np.argmin(distance)
                         bugs[b_ind].update_path(centroids[closest_centroid_ind])
-                        bugs[b_ind].plot_on_img(frame, contours[closest_centroid_ind])
+                        bugs[b_ind].plot_on_img(disp_frame, show_box, show_trail, contours[closest_centroid_ind])
 
+            cv2.putText(disp_frame, "%d Bugs in frame" % len(centroid_ind), (10, 20), cv2.FONT_HERSHEY_PLAIN, 1.0, (0, 0, 0))
             # Display the resulting frame
-            cv2.imshow('frame', cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-            if cv2.waitKey(100) & 0xFF == ord('q'):
+            cv2.imshow('frame', cv2.cvtColor(disp_frame, cv2.COLOR_BGR2RGB))
+            new_video.write(cv2.cvtColor(disp_frame, cv2.COLOR_BGR2RGB))
+            key = cv2.waitKey(60) & 0xFF
+            if key == ord('t'):
+                show_trail = 1 - show_trail
+            elif key == ord('b'):
+                show_box = 1 - show_box
+            elif key == ord(' '):
+                key = '0'
+                while key != ord(' ') and key != 27:
+                    if key == 27:
+                        break
+                    elif key == ord('t'):
+                        show_trail = 1 - show_trail
+                    elif key == ord('b'):
+                        show_box = 1 - show_box
+                    disp_frame = frame.copy()
+                    for i in range(len(centroid_ind)):
+                        bugs[bug_ind[i]].plot_on_img(disp_frame, show_box, show_trail, contours[centroid_ind[i]])
+                    cv2.imshow('frame', cv2.cvtColor(disp_frame, cv2.COLOR_BGR2RGB))
+                    key = cv2.waitKey(0)
+            if key == 27: #Esc ASCII code
                 break
+            key = '0'
+
     # When everything done, release the capture
+    bug.Bug.bug_counter = 0
     video.release()
+    new_video.release()
     cv2.destroyAllWindows()
