@@ -15,6 +15,7 @@ import os
 def track(video_path, contour_size_thresh, output_dir, debug):
     FRAME_HISTORY = 10
     EXIT_BORDER = 10
+    DIST_THRESH = 50
 
     # Initialize parameters
     video = cv2.VideoCapture(video_path)
@@ -96,6 +97,14 @@ def track(video_path, contour_size_thresh, output_dir, debug):
 
                 # Hungarian Algorithm Assignment
                 bug_ind, centroid_ind = linear_sum_assignment(cost_matrix)
+
+                # Reject assignments that are far from the previous point
+                while i < len(bug_ind):
+                    if np.linalg.norm(centroids[centroid_ind[i]] - bugs[bug_ind[i]].get_position()) > DIST_THRESH:
+                        bug_ind = np.delete(bug_ind, i)
+                        centroid_ind = np.delete(centroid_ind, i)
+                    else: 
+                        i = i + 1
 
                 for i in range(len(centroid_ind)):
                     bugs[bug_ind[i]].update_path(centroids[centroid_ind[i]])

@@ -57,14 +57,12 @@ label4 = Label(root, font="Gisha 12", fg='#006600', bg='#ccffcc', text="Press b 
 label4.grid(row=4, column=0, padx=0, pady=0)
 label5 = Label(root, font="Gisha 12", fg='#006600', bg='#ccffcc', text="Press t for trail", width=15)
 label5.grid(row=5, column=0, padx=0, pady=0)
-label6 = Label(root, font="Gisha 12", fg='#006600', bg='#ccffcc', text="Press d for distance", width=15)
+label6 = Label(root, font="Gisha 12", fg='#006600', bg='#ccffcc', text="Press space to \n pause/play", width=15)
 label6.grid(row=6, column=0, padx=0, pady=0)
-label7 = Label(root, font="Gisha 12", fg='#006600', bg='#ccffcc', text="Press space to \n pause/play", width=15)
+label7 = Label(root, font="Gisha 12", fg='#006600', bg='#ccffcc', text="In Debug Mode \n press Enter \n for next frame", width=15)
 label7.grid(row=7, column=0, padx=0, pady=0)
-label8 = Label(root, font="Gisha 12", fg='#006600', bg='#ccffcc', text="In Debug Mode \n press Enter \n for next frame", width=15)
+label8 = Label(root, font="Gisha 12", fg='#006600', bg='#ccffcc', text="Press Esc to quit", width=15)
 label8.grid(row=8, column=0, padx=0, pady=0)
-label9 = Label(root, font="Gisha 12", fg='#006600', bg='#ccffcc', text="Press Esc to quit", width=15)
-label9.grid(row=9, column=0, padx=0, pady=0)
 
 # Main frame for showing results
 canvas = Canvas(relief=RIDGE, bd=5, width=0.75*w, height=0.75*h).grid(row=1, column=1, columnspan=5, rowspan=22, sticky=E)
