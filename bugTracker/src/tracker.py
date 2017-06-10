@@ -16,7 +16,7 @@ def track(video_path, contour_size_thresh, output_dir, debug):
 
     FRAME_HISTORY = 10
     EXIT_BORDER = 10
-    DIST_THRESH = 350
+    DIST_THRESH = 25
     PENALTY_THRESH = 10
 
     # Initialize parameters
@@ -108,7 +108,7 @@ def track(video_path, contour_size_thresh, output_dir, debug):
 
             # Reject assignments that are far from the previous point
             for i in range(len(bug_ind)):
-                if np.sqrt((centroid_ind[i] - bug_ind[i]) ** 2 + (centroid_ind[i] - bug_ind[i]) ** 2) > DIST_THRESH:
+                if np.linalg.norm(centroids[centroid_ind[i]] - bugs[bug_ind[i]].get_position()) > DIST_THRESH:
                     bug_ind[i] = -1
                     centroid_ind[i] = -1
 

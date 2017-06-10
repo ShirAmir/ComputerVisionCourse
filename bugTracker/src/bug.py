@@ -53,6 +53,9 @@ class Bug:
 
         self.penalty = 0
 
+    def get_position(self):
+        return self.path[-1]
+
     def update_path(self, point_observation):
         self.kalman.correct(point_observation)
         pred = self.kalman.predict()
