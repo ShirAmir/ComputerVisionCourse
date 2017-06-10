@@ -12,7 +12,7 @@ from scipy.optimize import linear_sum_assignment
 import bug
 import os
 
-def track(video_path, contour_size_thresh, output_dir):
+def track(video_path, contour_size_thresh, output_dir, debug):
     FRAME_HISTORY = 10
     EXIT_BORDER = 10
 
@@ -136,7 +136,10 @@ def track(video_path, contour_size_thresh, output_dir):
             # Display the resulting frame
             cv2.imshow('frame', cv2.cvtColor(disp_frame, cv2.COLOR_BGR2RGB))
             new_video.write(cv2.cvtColor(disp_frame, cv2.COLOR_BGR2RGB))
-            key = cv2.waitKey(60) & 0xFF
+            if debug == True:
+                key = cv2.waitKey(0) & 0xFF
+            else:
+                key = cv2.waitKey(60) & 0xFF
             if key == ord('t'):
                 show_trail = 1 - show_trail
             elif key == ord('b'):
