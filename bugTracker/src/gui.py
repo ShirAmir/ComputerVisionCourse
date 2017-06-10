@@ -19,7 +19,10 @@ def set_output_dir():
     output_dir.set(askdirectory())
 
 def start():
-    tracker.track(video_path.get(), int(contour_size_thresh.get()), output_dir.get())
+    tracker.track(video_path.get(), int(contour_size_thresh.get()), output_dir.get(), debug.get())
+
+def start_enter(event):
+    tracker.track(video_path.get(), int(contour_size_thresh.get()), output_dir.get(), debug.get())
 
 root = Tk()
 root.title("Multi Tracker")
@@ -29,11 +32,13 @@ root.geometry("%dx%d+0+0" % (w, h))
 
 root.focus_set() # move focus to this widget
 root.bind("<Escape>", lambda e: e.widget.quit())
+root.bind("<Return>", start_enter)
 
 # Define all the variables
 video_path = StringVar()
 output_dir = StringVar()
 contour_size_thresh = StringVar()
+debug = BooleanVar()
 
 # Header
 headline = Label(root, font="Gisha 20 bold", bg='#ccffcc', fg='#006600', text="Multi Tracker App", anchor=CENTER)
@@ -56,8 +61,10 @@ label6 = Label(root, font="Gisha 12", fg='#006600', bg='#ccffcc', text="Press d 
 label6.grid(row=6, column=0, padx=0, pady=0)
 label7 = Label(root, font="Gisha 12", fg='#006600', bg='#ccffcc', text="Press space to \n pause/play", width=15)
 label7.grid(row=7, column=0, padx=0, pady=0)
-label8 = Label(root, font="Gisha 12", fg='#006600', bg='#ccffcc', text="Press Esc to quit", width=15)
+label8 = Label(root, font="Gisha 12", fg='#006600', bg='#ccffcc', text="In Debug Mode \n press Enter \n for next frame", width=15)
 label8.grid(row=8, column=0, padx=0, pady=0)
+label9 = Label(root, font="Gisha 12", fg='#006600', bg='#ccffcc', text="Press Esc to quit", width=15)
+label9.grid(row=9, column=0, padx=0, pady=0)
 
 # Main frame for showing results
 canvas = Canvas(relief=RIDGE, bd=5, width=0.75*w, height=0.75*h).grid(row=1, column=1, columnspan=5, rowspan=22, sticky=E)
@@ -67,8 +74,11 @@ image = Label(canvas, image="", anchor=CENTER)
 label1 = Label(root, font="Gisha 12", fg='#006600', bg='#ccffcc', text="Contour Size:", width=15)
 label1.grid(row=1, column=6, padx=0, pady=0)
 entry1 = Entry(root, font="Gisha 12", fg='#006600', textvariable=contour_size_thresh, width=12)
-entry1.grid(row=2, column=6, padx=15, pady=0)
+entry1.grid(row=2, column=6, padx=0, pady=0)
 contour_size_thresh.set("100")
+check1 = Checkbutton(root, font="Gisha 12", fg='#006600', bg='#ccffcc', text="Debug Mode", variable=debug, onvalue=True, offvalue=False, width=12)
+check1.grid(row=3, column=6, padx=0, pady=0)
+debug.set(True)
 
 # Footer inside images frame
 explanations = "Press each button once and be patient :) \n press Esc to leave"

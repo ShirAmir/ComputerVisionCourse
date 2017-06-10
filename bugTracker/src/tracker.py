@@ -12,9 +12,12 @@ from scipy.optimize import linear_sum_assignment
 import bug
 import os
 
-def track(video_path, contour_size_thresh, output_dir):
+def track(video_path, contour_size_thresh, output_dir, debug):
+
     FRAME_HISTORY = 10
     EXIT_BORDER = 10
+    DIST_THRESH = 350
+    PENALTY_THRESH = 10
 
     # Initialize parameters
     video = cv2.VideoCapture(video_path)
@@ -52,6 +55,7 @@ def track(video_path, contour_size_thresh, output_dir):
         # Apply Background Subtraction
         fgmask = fgbg.apply(frame)
 
+        # Get rid of the first frames in which background isn't properly identified
         if frame_num < FRAME_HISTORY * 2.5:
             continue
 
@@ -64,6 +68,10 @@ def track(video_path, contour_size_thresh, output_dir):
         # Find object contours
         _, contours, hierarchy = cv2.findContours(fgmask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         contours[:] = [item for i, item in enumerate(contours) if cv2.contourArea(contours[i]) >= contour_size_thresh]
+        #fgmask = cv2.cvtColor(fgmask, cv2.CV_GRAY2RGB)
+        cv2.drawContours(fgmask, contours, -1, (0, 255, 0), 2)
+            #cv2.imshow('frame', cv2.cvtColor(disp_frame, cv2.COLOR_BGR2RGB))
+        #cv2.imshow('bg', cv2.cvtColor(fgmask, cv2.COLOR_BGR2RGB))
 
         print("contours found: %d" % len(contours))
 
@@ -86,57 +94,73 @@ def track(video_path, contour_size_thresh, output_dir):
                 buggy = bug.Bug(cent)
                 bugs.append(buggy)
         else:
-            if len(centroids):
-                cost_matrix = np.zeros((len(bugs), len(centroids)))
+            # Calculate cost matrix for Hungarian Algorithm
+            cost_matrix = np.zeros((len(bugs), len(centroids)))
+            for i, buggy in enumerate(bugs):
+                last_pos = buggy.path[-1]
+                cost_matrix[i, :] = np.sqrt((centroids[:, 0] - last_pos[0]) ** 2 +
+                                            (centroids[:, 1] - last_pos[1]) ** 2)
 
-                for i, buggy in enumerate(bugs):
-                    last_pos = buggy.path[-1]
-                    cost_matrix[i, :] = np.sqrt((centroids[:, 0] - last_pos[0]) ** 2 +
-                                                (centroids[:, 1] - last_pos[1]) ** 2)
+            # Hungarian Algorithm Assignment
+            bug_ind, centroid_ind = linear_sum_assignment(cost_matrix)
+            #print(bug_ind)
+            #print(centroid_ind)
 
-                # Hungarian Algorithm Assignment
-                bug_ind, centroid_ind = linear_sum_assignment(cost_matrix)
+            # Reject assignments that are far from the previous point
+            for i in range(len(bug_ind)):
+                if np.sqrt((centroid_ind[i] - bug_ind[i]) ** 2 + (centroid_ind[i] - bug_ind[i]) ** 2) > DIST_THRESH:
+                    bug_ind[i] = -1
+                    centroid_ind[i] = -1
 
-                for i in range(len(centroid_ind)):
+            # Use all the valid assignments
+            for i in range(len(bug_ind)):
+                if bug_ind[i] != -1:
                     bugs[bug_ind[i]].update_path(centroids[centroid_ind[i]])
                     bugs[bug_ind[i]].plot_on_img(disp_frame, show_box, show_trail, contours[centroid_ind[i]])
 
-                # Number of bugs < number of centroids
-                # We want to add more bugs
-                if len(bugs) < len(centroids):
-                    new_centrois_inds = [x for x in range(len(centroids)) if x not in centroid_ind]
-                    for c_ind in new_centrois_inds:
-                        bugs.append(bug.Bug(centroids[c_ind]))
+            # See wich bugs and centroids remain unassigned
+            bug_ind = np.unique(bug_ind)
+            if bug_ind[0] == -1:
+                bug_ind = bug_ind[1:]
+            centroid_ind = np.unique(centroid_ind)
+            if centroid_ind[0] == -1:
+                centroid_ind = centroid_ind[1:]
 
-                # Number of begs < number of centroids
-                # We want to check if bugs merged or bugs left
-                elif len(bugs) > len(centroids):
-                    # First check if we need to delete bugs
-                    unassigned_bugs = [(i, x) for i, x in enumerate(bugs) if i not in bug_ind]
-                    bugs_to_delete = []
+            print(np.shape(centroid_ind))
 
-                    for b_ind, b in unassigned_bugs:
-                        x, y = b.path[-1]
-                        if ((x < EXIT_BORDER) or (x > (frame.shape[1] - EXIT_BORDER)) or (y < EXIT_BORDER) or
-                                (y > (frame.shape[0] - EXIT_BORDER))):
-                            bugs_to_delete.append(b_ind)
-                    bugs = [x for i, x in enumerate(bugs) if i not in bugs_to_delete]
-                    print("Deleted %s" % str(bugs_to_delete))
+            assigned_centroids = np.zeros(len(centroids))
+            print(np.shape(assigned_centroids))
+            assigned_centroids[centroid_ind] = 1
+            assigned_bugs = np.zeros(len(bugs))
+            assigned_bugs[np.unique(bug_ind)] = 1
 
-                    # Check if bugs merged
-                    unassigned_bugs = [(i, x) for i, x in enumerate(bugs) if i not in bug_ind]
-                    for b_ind, b in unassigned_bugs:
-                        last_pos = b.path[-1]
-                        distance = np.sqrt((centroids[:, 0] - last_pos[0]) ** 2 + (centroids[:, 1] - last_pos[1]) ** 2)
-                        closest_centroid_ind = np.argmin(distance)
-                        bugs[b_ind].update_path(centroids[closest_centroid_ind])
-                        bugs[b_ind].plot_on_img(disp_frame, show_box, show_trail, contours[closest_centroid_ind])
+            # Create a new bug out of each unassigned centroid
+            for i in range(len(assigned_centroids)):
+                if assigned_centroids[i] == 0:
+                    buggy = bug.Bug(centroids[i])
+                    bugs.append(buggy)
+                    buggy.plot_on_img(disp_frame, show_box, show_trail, contours[i])
+
+            bugs_to_delete = []
+
+            for i in range(len(assigned_bugs)):
+                if assigned_bugs[i] == 0:
+                    bugs[i].penalty = bugs[i].penalty + 1
+                    if bugs[i].penalty >= PENALTY_THRESH:
+                        bugs_to_delete.append(i)
+            
+            # Delete unassigned bugs from the bug list
+            bugs = [x for i, x in enumerate(bugs) if i not in bugs_to_delete]
 
             cv2.putText(disp_frame, "%d Bugs in frame" % len(centroid_ind), (10, 20), cv2.FONT_HERSHEY_PLAIN, 1.0, (0, 0, 0))
+
             # Display the resulting frame
             cv2.imshow('frame', cv2.cvtColor(disp_frame, cv2.COLOR_BGR2RGB))
             new_video.write(cv2.cvtColor(disp_frame, cv2.COLOR_BGR2RGB))
-            key = cv2.waitKey(60) & 0xFF
+            if debug == True:
+                key = cv2.waitKey(0) & 0xFF
+            else:
+                key = cv2.waitKey(60) & 0xFF
             if key == ord('t'):
                 show_trail = 1 - show_trail
             elif key == ord('b'):
@@ -153,12 +177,13 @@ def track(video_path, contour_size_thresh, output_dir):
                     disp_frame = frame.copy()
                     for i in range(len(centroid_ind)):
                         bugs[bug_ind[i]].plot_on_img(disp_frame, show_box, show_trail, contours[centroid_ind[i]])
+                    cv2.putText(disp_frame, "%d Bugs in frame" % len(centroid_ind), (10, 20), cv2.FONT_HERSHEY_PLAIN, 1.0, (0, 0, 0))
                     cv2.imshow('frame', cv2.cvtColor(disp_frame, cv2.COLOR_BGR2RGB))
                     key = cv2.waitKey(0)
             if key == 27: #Esc ASCII code
                 break
             key = '0'
-
+    
     # When everything done, release the capture
     bug.Bug.bug_counter = 0
     video.release()

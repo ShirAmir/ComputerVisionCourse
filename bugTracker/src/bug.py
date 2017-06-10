@@ -51,6 +51,8 @@ class Bug:
         # The bug's path
         self.path = [start_point]
 
+        self.penalty = 0
+
     def update_path(self, point_observation):
         self.kalman.correct(point_observation)
         pred = self.kalman.predict()
