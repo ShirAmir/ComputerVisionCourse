@@ -13,7 +13,7 @@ In general, background subtraciton computes the pixel-wise subtraction between t
 As consequence, the areas that changed between the two images would be indicated. 
 We use the `createBackgroundSubtractorMOG` function in openCV which implements a Gaussian Mixture-Based background subtraction.
 
-<img src="utility/background_subtraction.jpg" width="600" align="middle">
+<img src="utility/background_subtraction.JPG" width="600" align="middle">
 
 #### Morphological Transformations
 As noticed in the previous image, some non relevant areas turn white due to shadowing and lumination problems.
