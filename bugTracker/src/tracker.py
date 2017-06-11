@@ -122,10 +122,7 @@ def track(video_path, contour_size_thresh, dist_thresh, penalty_thresh, output_d
             if centroid_ind[0] == -1:
                 centroid_ind = centroid_ind[1:]
 
-            print(np.shape(centroid_ind))
-
             assigned_centroids = np.zeros(len(centroids))
-            print(np.shape(assigned_centroids))
             assigned_centroids[centroid_ind] = 1
             assigned_bugs = np.zeros(len(bugs))
             assigned_bugs[np.unique(bug_ind)] = 1
