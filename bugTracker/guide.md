@@ -29,6 +29,9 @@ The results are pleasing:
 
 <img src="utility/contours.JPG" width="600" align="middle">
 
+#### Kalman Filter
+We used the *Kalman Filter Tracker* in order to track each object. This tracker helps smoothing the trail of each object, helps in cases of temporal no-recognition. Also, it helps in the extremal cases detailed later in the document. It is worth mentioning that there are significantly better trackers, such as *Spectral Filtering Tracker*. Yet openCV does not contain a reliable implementation of this tracker, so we decided not to use it.
+
 #### Hungarian Algorithm
 After we identified each object, we must assign the new recognition to previous tracked objects. 
 We use the *Hungarian Algorithm* to preform this task. 
