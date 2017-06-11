@@ -19,10 +19,10 @@ def set_output_dir():
     output_dir.set(askdirectory())
 
 def start():
-    tracker.track(video_path.get(), int(contour_size_thresh.get()), output_dir.get(), debug.get())
+    tracker.track(video_path.get(), int(contour_size_thresh.get()), int(dist_thresh.get()), int(penalty_thresh.get()), output_dir.get(), debug.get())
 
 def start_enter(event):
-    tracker.track(video_path.get(), int(contour_size_thresh.get()), output_dir.get(), debug.get())
+    tracker.track(video_path.get(), int(contour_size_thresh.get()), int(dist_thresh.get()), int(penalty_thresh.get()), output_dir.get(), debug.get())
 
 root = Tk()
 root.title("Multi Tracker")
@@ -38,6 +38,8 @@ root.bind("<Return>", start_enter)
 video_path = StringVar()
 output_dir = StringVar()
 contour_size_thresh = StringVar()
+dist_thresh = StringVar()
+penalty_thresh = StringVar()
 debug = BooleanVar()
 
 # Header
@@ -57,14 +59,12 @@ label4 = Label(root, font="Gisha 12", fg='#006600', bg='#ccffcc', text="Press b 
 label4.grid(row=4, column=0, padx=0, pady=0)
 label5 = Label(root, font="Gisha 12", fg='#006600', bg='#ccffcc', text="Press t for trail", width=15)
 label5.grid(row=5, column=0, padx=0, pady=0)
-label6 = Label(root, font="Gisha 12", fg='#006600', bg='#ccffcc', text="Press d for distance", width=15)
+label6 = Label(root, font="Gisha 12", fg='#006600', bg='#ccffcc', text="Press space to \n pause/play", width=15)
 label6.grid(row=6, column=0, padx=0, pady=0)
-label7 = Label(root, font="Gisha 12", fg='#006600', bg='#ccffcc', text="Press space to \n pause/play", width=15)
+label7 = Label(root, font="Gisha 12", fg='#006600', bg='#ccffcc', text="In Debug Mode \n press Enter \n for next frame", width=15)
 label7.grid(row=7, column=0, padx=0, pady=0)
-label8 = Label(root, font="Gisha 12", fg='#006600', bg='#ccffcc', text="In Debug Mode \n press Enter \n for next frame", width=15)
+label8 = Label(root, font="Gisha 12", fg='#006600', bg='#ccffcc', text="Press Esc to quit", width=15)
 label8.grid(row=8, column=0, padx=0, pady=0)
-label9 = Label(root, font="Gisha 12", fg='#006600', bg='#ccffcc', text="Press Esc to quit", width=15)
-label9.grid(row=9, column=0, padx=0, pady=0)
 
 # Main frame for showing results
 canvas = Canvas(relief=RIDGE, bd=5, width=0.75*w, height=0.75*h).grid(row=1, column=1, columnspan=5, rowspan=22, sticky=E)
@@ -76,9 +76,19 @@ label1.grid(row=1, column=6, padx=0, pady=0)
 entry1 = Entry(root, font="Gisha 12", fg='#006600', textvariable=contour_size_thresh, width=12)
 entry1.grid(row=2, column=6, padx=0, pady=0)
 contour_size_thresh.set("100")
+label2 = Label(root, font="Gisha 12", fg='#006600', bg='#ccffcc', text="Max Distance:", width=15)
+label2.grid(row=3, column=6, padx=0, pady=0)
+entry2 = Entry(root, font="Gisha 12", fg='#006600', textvariable=contour_size_thresh, width=12)
+entry2.grid(row=4, column=6, padx=0, pady=0)
+dist_thresh.set("70")
+label3 = Label(root, font="Gisha 12", fg='#006600', bg='#ccffcc', text="Max Penalty:", width=15)
+label3.grid(row=5, column=6, padx=0, pady=0)
+entry3 = Entry(root, font="Gisha 12", fg='#006600', textvariable=contour_size_thresh, width=12)
+entry3.grid(row=6, column=6, padx=0, pady=0)
+penalty_thresh.set("12")
 check1 = Checkbutton(root, font="Gisha 12", fg='#006600', bg='#ccffcc', text="Debug Mode", variable=debug, onvalue=True, offvalue=False, width=12)
-check1.grid(row=3, column=6, padx=0, pady=0)
-debug.set(True)
+check1.grid(row=7, column=6, padx=0, pady=0)
+debug.set(False)
 
 # Footer inside images frame
 explanations = "Press each button once and be patient :) \n press Esc to leave"

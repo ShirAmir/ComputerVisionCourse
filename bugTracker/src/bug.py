@@ -57,6 +57,7 @@ class Bug:
         return self.path[-1]
 
     def update_path(self, point_observation):
+        self.penalty = 0 # initialize penalty after rerecognition
         self.kalman.correct(point_observation)
         pred = self.kalman.predict()
         cx, cy = pred[0], pred[1]

@@ -12,12 +12,12 @@ from scipy.optimize import linear_sum_assignment
 import bug
 import os
 
-def track(video_path, contour_size_thresh, output_dir, debug):
+def track(video_path, contour_size_thresh, dist_thresh, penalty_thresh, output_dir, debug):
 
     FRAME_HISTORY = 10
-    EXIT_BORDER = 10
-    DIST_THRESH = 25
-    PENALTY_THRESH = 10
+    DIST_THRESH = dist_thresh
+    PENALTY_THRESH = penalty_thresh
+    CONTOUR_THRESH = contour_size_thresh
 
     # Initialize parameters
     video = cv2.VideoCapture(video_path)
@@ -50,8 +50,6 @@ def track(video_path, contour_size_thresh, output_dir, debug):
         frame_num = frame_num + 1
         # cv2.putText(frame, "#%d" % frame_num, (3, 12), cv2.FONT_HERSHEY_PLAIN, 1.0, (0, 127, 0), 1)
 
-        print("Frame #%d | " % frame_num, end="")
-
         # Apply Background Subtraction
         fgmask = fgbg.apply(frame)
 
@@ -67,13 +65,11 @@ def track(video_path, contour_size_thresh, output_dir, debug):
 
         # Find object contours
         _, contours, hierarchy = cv2.findContours(fgmask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        contours[:] = [item for i, item in enumerate(contours) if cv2.contourArea(contours[i]) >= contour_size_thresh]
+        contours[:] = [item for i, item in enumerate(contours) if cv2.contourArea(contours[i]) >= CONTOUR_THRESH]
         #fgmask = cv2.cvtColor(fgmask, cv2.CV_GRAY2RGB)
-        cv2.drawContours(fgmask, contours, -1, (0, 255, 0), 2)
+        #cv2.drawContours(disp_frame, contours, -1, (0, 255, 0), 2)
             #cv2.imshow('frame', cv2.cvtColor(disp_frame, cv2.COLOR_BGR2RGB))
         #cv2.imshow('bg', cv2.cvtColor(fgmask, cv2.COLOR_BGR2RGB))
-
-        print("contours found: %d" % len(contours))
 
         centroids_list = []
         for curr_contour in contours:
