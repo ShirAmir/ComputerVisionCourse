@@ -27,7 +27,7 @@ We consider only the contours larger than a threshold size in order to eliminate
 Then we use the centriods of each contour as their representative.
 The results are pleasing:
 
-<img src="utility/contours.jpg" width="600" align="middle">
+<img src="utility/contours.JPG" width="600" align="middle">
 
 #### Hungarian Algorithm
 After we identified each object, we must assign the new recognition to previous tracked objects. 
@@ -84,20 +84,20 @@ Before running the program, make sure your python configuration complies with [R
 
 1. Open the command line in `src` directory.
 
-    <img src="utility/conda_prompt1.jpg" width="600" align="middle">  
+    <img src="utility/conda_prompt1.JPG" width="600" align="middle">  
     
 2. Run our GUI by typing `python gui.py` into the command line.  
     
-    <img src="utility/conda_prompt2.jpg" width="600" align="middle">    
+    <img src="utility/conda_prompt2.JPG" width="600" align="middle">    
     
     At this point the GUI window will be opened:  
     
-    <img src="utility/gui1.jpg" width="600" align="middle">  
+    <img src="utility/gui1.JPG" width="600" align="middle">  
     
 3. Configure the program's setting by pressing the correlating buttons on the left:  
 
     <p>
-    <img src="utility/left_buttons.jpg" width="100" align="right">  
+    <img src="utility/left_buttons.JPG" width="100" align="right">  
     
     * **Load Video** for loading a new testing video.
     * **Output Dir** for chossing the resulted output directory.
@@ -106,32 +106,32 @@ Before running the program, make sure your python configuration complies with [R
 
 4. When pressing one of the aforementioned buttons the file explorer will be opened:
 
-    <img src="utility/file_explorer.jpg" width="600" align="middle">  
+    <img src="utility/file_explorer.JPG" width="600" align="middle">  
 
     Then choose the requested file for *Load Video* or a directory for *Output Dir*.
 
 5. Next, configure the programs parameters on the right by inserting a different value into each textbox:
 
-    <img src="utility/config.jpg" width="100" align="middle">  
+    <img src="utility/config.JPG" width="100" align="middle">  
 
 6. You may enable and disable the debug mode by pressing the checkbox. Debug mode allows you to follow the proccess frame by frame, by pressing `Enter` to continue to the next frame.
 
-    <img src="utility/debug_btn.jpg" width="100" align="middle">  
+    <img src="utility/debug_btn.JPG" width="100" align="middle">  
 
 7. After configuring the program, start tracking by pressing the *Start* button. 
 
-    <img src="utility/start_btn.jpg" width="100" align="middle">  
+    <img src="utility/start_btn.JPG" width="100" align="middle">  
 
 8. Then a window with the resulting video will appear:
 
-    <img src="utility/video.jpg" width="256" align="middle">  
+    <img src="utility/video.JPG" width="256" align="middle">  
     
     Also, the result will be saved in the output directory which is `results` directory by default.
     One can close the result window by pressing *Esc* button.
 
 9. During the video streaming you can use the instructions on the left for smart inspection:
 
-    <img src="utility/instructions.jpg" width="100" align="middle">  
+    <img src="utility/instructions.JPG" width="100" align="middle">  
 
 10. In order to close the program, one can simply press *Esc* or close in manually.
 
